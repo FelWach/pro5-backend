@@ -1,4 +1,4 @@
 # local env files
 .env
 
-personalConstants.js
+node_modules/
