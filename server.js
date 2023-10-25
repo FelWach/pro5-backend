@@ -1,7 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const { generateAnswer } = require("./langchain.js");
-const { port } = require("./personalConstants.js");
+const { config } = require("dotenv");
+config();
 
 const app = express();
 app.use(cors());
@@ -20,6 +21,6 @@ app.post("/saveData", async (req, res) => {
 app.get("/", async (req, res) => {
   res.send(`Stored Data: ${answer}`);
 });
-app.listen(process.env.PORT || port, () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Server is running on port ${process.env.PORT}`);
 });
