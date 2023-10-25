@@ -1,11 +1,11 @@
-import { generateAnswer } from "./langchain.js";
-import express from "express";
-import cors from "cors";
+const express = require("express");
+const cors = require("cors");
+const { generateAnswer } = require("./langchain.js");
+const { port } = require("./personalConstants.js");
 
 const app = express();
 app.use(cors());
 
-const port = 5000;
 let storedData = "";
 let answer = "";
 

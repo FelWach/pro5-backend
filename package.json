@@ -5,7 +5,6 @@
   "repository": "https://github.com/FelWach/pro5-backend.git",
   "author": "FelWach <s2110238071@fhooe.at>",
   "license": "MIT",
-  "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"

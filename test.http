@@ -1,0 +1,9 @@
+GET http://localhost:5000/
+
+###
+
+POST http://localhost:5000/saveData
+Content-Type: application/json
+{
+    "data": "Hello World"
+}
