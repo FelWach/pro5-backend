@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { generateAnswer } = require("./langchain.js");
+const { generateAnswer, finishAnswer } = require("./langchain.js");
 const { config } = require("dotenv");
 const bodyParser = require("body-parser");
 const { addUser, getAllUsers, deleteUser } = require("./dbFunctions.js");
@@ -13,6 +13,8 @@ app.use(bodyParser.json());
 
 let storedData = "";
 let answer = "";
+let text = "";
+let questionAmount;
 
 app.use(express.json());
 
@@ -41,14 +43,22 @@ app.get("/getAllUsers", async (req, res) => {
 });
 
 app.post("/saveData", async (req, res) => {
-  const { data } = req.body;
-  storedData = data;
-  res.json({ message: `Data received successfully ${storedData}` });
-  answer = await generateAnswer(storedData);
+  const { topic, nbQuestions, language } = req.body;
+  storedData = topic;
+  questionAmount = nbQuestions;
+  lan = language;
+  res.json({
+    message: `Data received successfully ${storedData} with a number of Questions = ${questionAmount} and the language is ${lan}`,
+  });
 });
 
-app.get("/", async (req, res) => {
-  res.send(`Stored Data: ${answer}`);
+app.get("/main", async (req, res) => {
+  answer = await generateAnswer(storedData, questionAmount, lan);
+  text = await finishAnswer(answer, questionAmount);
+  if (answer.charAt(answer.length - 1) !== ".") {
+    text = await finishAnswer(text, questionAmount);
+  }
+  res.send(text);
 });
 
 app.delete("/deleteUser/:id", async (req, res) => {
