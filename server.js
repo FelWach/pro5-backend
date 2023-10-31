@@ -3,8 +3,13 @@ const cors = require("cors");
 const { generateAnswer } = require("./langchain.js");
 const { config } = require("dotenv");
 const bodyParser = require("body-parser");
-const { addUser, getAllUsers, deleteUser } = require("./dbFunctions.js");
-const { addHistoryEntry, getUserHistory } = require("./dbFunctions.js");
+const {
+  addUser,
+  getAllUsers,
+  deleteUser,
+  addHistoryEntry,
+  getUserHistory,
+} = require("./dbFunctions.js");
 
 // Umgebungsvariablen aus der Datei .env laden
 config();
@@ -34,8 +39,6 @@ app.get("/", async (req, res) => {
   res.send(`Stored Data: ${answer}`);
 });
 
-
-
 // ROUTEN FÜR DIE BENUTZERTABELLE
 
 // Route zum Hinzufügen eines Benutzers
@@ -43,7 +46,9 @@ app.post("/addUser", async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
-    return res.status(400).json({ message: "Name, E-Mail und Passwort erforderlich" });
+    return res
+      .status(400)
+      .json({ message: "Name, E-Mail und Passwort erforderlich" });
   }
 
   try {
@@ -84,27 +89,26 @@ app.delete("/deleteUser/:id", async (req, res) => {
   }
 });
 
-
-
 // ROUTEN FÜR DIE VERLAUFSTABELLE
 
 // Route zum Hinzufügen eines Verlaufseintrags
 app.post("/addHistoryEntry", async (req, res) => {
-  const { userId, themaId, frage, antwort, timestamp } = req.body;
+  const { userId, themaId, frage, antwort } = req.body;
 
-  if (!userId || !themaId || !frage || !antwort || !timestamp) {
+  if (!userId || !themaId || !frage || !antwort) {
     return res.status(400).json({ message: "Ungültige Anfrage" });
   }
 
   try {
     // Verlaufseintrag hinzufügen
-    await addHistoryEntry(userId, themaId, frage, antwort, timestamp);
+    await addHistoryEntry(userId, themaId, frage, antwort);
     res.json({ message: "Verlaufseintrag hinzugefügt" });
   } catch (error) {
-    res.status(500).json({ message: "Fehler beim Hinzufügen des Verlaufseintrags" });
+    res
+      .status(500)
+      .json({ message: "Fehler beim Hinzufügen des Verlaufseintrags" });
   }
 });
-
 
 // Route zum Abrufen des Verlaufs eines Benutzers
 app.get("/getUserHistory/:userId", async (req, res) => {
@@ -122,15 +126,7 @@ app.get("/getUserHistory/:userId", async (req, res) => {
   }
 });
 
-
-
 // Server starten
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);
 });
-
-
-
-
-
-

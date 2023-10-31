@@ -15,7 +15,7 @@ async function initializeDatabase() {
           reject(err);
         } else {
           db.run(
-            `CREATE TABLE IF NOT EXISTS verlauf (id INTEGER PRIMARY KEY AUTOINCREMENT, userId INTEGER, themaId INTEGER, frage TEXT, antwort TEXT, timestamp DATETIME)`,
+            `CREATE TABLE IF NOT EXISTS verlauf (id INTEGER PRIMARY KEY AUTOINCREMENT, userId INTEGER, themaId INTEGER, frage TEXT, antwort TEXT)`,
             (err) => {
               if (err) {
                 reject(err);
@@ -31,8 +31,6 @@ async function initializeDatabase() {
   });
 }
 
-
-
 // Ab hier die Funktionen für die Usertabelle
 
 // Funktion zum Hinzufügen eines Benutzers
@@ -47,7 +45,9 @@ async function addUser(name, email, password) {
         if (err) {
           reject(err);
         } else {
-          const stmt = db.prepare("INSERT INTO user (name, email, password) VALUES (?, ?, ?)");
+          const stmt = db.prepare(
+            "INSERT INTO user (name, email, password) VALUES (?, ?, ?)"
+          );
           stmt.run(name, email, hash, function (err) {
             if (err) {
               reject(err);
@@ -103,18 +103,18 @@ async function deleteUser(id) {
   });
 }
 
-
-
 // Ab hier die Funktionen für die Verlaufstabelle
 
 // Funktion zum Hinzufügen eines Fragen/Antworten - Verlaufseintrags
-async function addHistoryEntry(userId, themaId, frage, antwort, timestamp) {
+async function addHistoryEntry(userId, themaId, frage, antwort) {
   return new Promise(async (resolve, reject) => {
     try {
       const db = new sqlite3.Database(dbPath);
 
-      const stmt = db.prepare("INSERT INTO verlauf (userId, themaId, frage, antwort, timestamp) VALUES (?, ?, ?, ?, ?)");
-      stmt.run(userId, themaId, frage, antwort, timestamp, function (err) {
+      const stmt = db.prepare(
+        "INSERT INTO verlauf (userId, themaId, frage, antwort) VALUES (?, ?, ?, ?, ?)"
+      );
+      stmt.run(userId, themaId, frage, antwort, function (err) {
         if (err) {
           reject(err);
         } else {
@@ -145,6 +145,11 @@ async function getUserHistory(userId) {
   });
 }
 
-
 // Export der Funktionen
-module.exports = { addUser, getAllUsers, deleteUser, addHistoryEntry, getUserHistory };
+module.exports = {
+  addUser,
+  getAllUsers,
+  deleteUser,
+  addHistoryEntry,
+  getUserHistory,
+};
