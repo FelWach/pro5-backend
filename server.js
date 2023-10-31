@@ -71,7 +71,6 @@ app.get("/getAllUsers", async (req, res) => {
   }
 });
 
-
 app.post("/saveData", async (req, res) => {
   const { topic, nbQuestions, language } = req.body;
   storedData = topic;
@@ -90,8 +89,6 @@ app.get("/main", async (req, res) => {
   }
   res.send(text);
 });
-
-=======
 // Route zum Hinzufügen eines Verlaufseintrags
 
 app.delete("/deleteUser/:id", async (req, res) => {
