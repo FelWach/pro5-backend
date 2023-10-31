@@ -24,23 +24,22 @@ let storedData = "";
 let answer = "";
 let text = "";
 let questionAmount;
+let lan;
 
 // Middleware für die Verarbeitung von JSON-Daten
 app.use(express.json());
 
-// Routen für die Daten in der Datenbank
-app.post("/saveData", async (req, res) => {
-  const { data } = req.body;
-  storedData = data;
-  res.json({ message: `Data received successfully ${storedData}` });
-  answer = await generateAnswer(storedData);
-});
+app.post("/generateAnswer", async (req, res) => {
+  const { topic, nbQuestions, language } = req.body;
 
-// Route zum Abrufen der gespeicherten Daten
-app.get("/", async (req, res) => {
-  res.send(`Stored Data: ${answer}`);
-});
+  storedData = topic;
+  questionAmount = nbQuestions;
+  lan = language;
 
+  res.send(
+    `Data received successfully ${topic} with a number of Questions = ${nbQuestions} and the language is ${language}`
+  );
+});
 // ROUTEN FÜR DIE BENUTZERTABELLE
 
 // Route zum Hinzufügen eines Benutzers
