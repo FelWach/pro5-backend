@@ -3,6 +3,7 @@ Content-Type: application/json
 
 {
     "name": "TestUser2",
+    "email": "testuser2@example.com",
     "password": "2222"
 }
 
@@ -12,5 +13,20 @@ GET http://localhost:5000/getAllUsers HTTP/1.1
 
 ###
 
+DELETE http://localhost:5000/deleteUser/4 HTTP/1.1
 
-DELETE http://localhost:5000/deleteUser/1 HTTP/1.1
+###
+
+POST http://localhost:5000/addHistoryEntry HTTP/1.1
+Content-Type: application/json
+
+{
+    "userId": 4,
+    "themaId": 1,
+    "frage": "FSaFsa",
+    "antwort": "Die Antwort hier"
+}
+
+###
+
+GET http://localhost:5000/getUserHistory/4 HTTP/1.1

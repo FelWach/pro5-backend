@@ -3,34 +3,63 @@ const cors = require("cors");
 const { generateAnswer } = require("./langchain.js");
 const { config } = require("dotenv");
 const bodyParser = require("body-parser");
-const { addUser, getAllUsers, deleteUser } = require("./dbFunctions.js");
+const {
+  addUser,
+  getAllUsers,
+  deleteUser,
+  addHistoryEntry,
+  getUserHistory,
+} = require("./dbFunctions.js");
 
+// Umgebungsvariablen aus der Datei .env laden
 config();
 
+// Server erstellen
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// Datenbankverbindung
 let storedData = "";
 let answer = "";
 
+// Middleware für die Verarbeitung von JSON-Daten
 app.use(express.json());
 
-app.post("/addUser", async (req, res) => {
-  const { name, password } = req.body;
+// Routen für die Daten in der Datenbank
+app.post("/saveData", async (req, res) => {
+  const { data } = req.body;
+  storedData = data;
+  res.json({ message: `Data received successfully ${storedData}` });
+  answer = await generateAnswer(storedData);
+});
 
-  if (!name || !password) {
-    return res.status(400).json({ message: "Name und Passwort erforderlich" });
+// Route zum Abrufen der gespeicherten Daten
+app.get("/", async (req, res) => {
+  res.send(`Stored Data: ${answer}`);
+});
+
+// ROUTEN FÜR DIE BENUTZERTABELLE
+
+// Route zum Hinzufügen eines Benutzers
+app.post("/addUser", async (req, res) => {
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    return res
+      .status(400)
+      .json({ message: "Name, E-Mail und Passwort erforderlich" });
   }
 
   try {
-    const userId = await addUser(name, password);
+    const userId = await addUser(name, email, password);
     res.json({ message: "Benutzer wurde hinzugefügt", userId });
   } catch (error) {
     res.status(500).json({ message: "Fehler beim Hinzufügen des Benutzers" });
   }
 });
 
+// Route zum Abrufen aller Benutzer
 app.get("/getAllUsers", async (req, res) => {
   try {
     const users = await getAllUsers();
@@ -40,17 +69,7 @@ app.get("/getAllUsers", async (req, res) => {
   }
 });
 
-app.post("/saveData", async (req, res) => {
-  const { data } = req.body;
-  storedData = data;
-  res.json({ message: `Data received successfully ${storedData}` });
-  answer = await generateAnswer(storedData);
-});
-
-app.get("/", async (req, res) => {
-  res.send(`Stored Data: ${answer}`);
-});
-
+// Route zum Hinzufügen eines Verlaufseintrags
 app.delete("/deleteUser/:id", async (req, res) => {
   const userId = req.params.id;
 
@@ -70,6 +89,44 @@ app.delete("/deleteUser/:id", async (req, res) => {
   }
 });
 
+// ROUTEN FÜR DIE VERLAUFSTABELLE
+
+// Route zum Hinzufügen eines Verlaufseintrags
+app.post("/addHistoryEntry", async (req, res) => {
+  const { userId, themaId, frage, antwort } = req.body;
+
+  if (!userId || !themaId || !frage || !antwort) {
+    return res.status(400).json({ message: "Ungültige Anfrage" });
+  }
+
+  try {
+    // Verlaufseintrag hinzufügen
+    await addHistoryEntry(userId, themaId, frage, antwort);
+    res.json({ message: "Verlaufseintrag hinzugefügt" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Fehler beim Hinzufügen des Verlaufseintrags" });
+  }
+});
+
+// Route zum Abrufen des Verlaufs eines Benutzers
+app.get("/getUserHistory/:userId", async (req, res) => {
+  const userId = req.params.userId;
+
+  if (!userId) {
+    return res.status(400).json({ message: "Benutzer-ID erforderlich" });
+  }
+
+  try {
+    const userHistory = await getUserHistory(userId);
+    res.json(userHistory);
+  } catch (error) {
+    res.status(500).json({ message: "Fehler beim Abrufen des Verlaufs" });
+  }
+});
+
+// Server starten
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);
 });
