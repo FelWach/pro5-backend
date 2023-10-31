@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { generateAnswer } = require("./langchain.js");
+const { generateAnswer, finishAnswer } = require("./langchain.js");
 const { config } = require("dotenv");
 const bodyParser = require("body-parser");
 const {
@@ -22,6 +22,8 @@ app.use(bodyParser.json());
 // Datenbankverbindung
 let storedData = "";
 let answer = "";
+let text = "";
+let questionAmount;
 
 // Middleware für die Verarbeitung von JSON-Daten
 app.use(express.json());
@@ -69,7 +71,29 @@ app.get("/getAllUsers", async (req, res) => {
   }
 });
 
+
+app.post("/saveData", async (req, res) => {
+  const { topic, nbQuestions, language } = req.body;
+  storedData = topic;
+  questionAmount = nbQuestions;
+  lan = language;
+  res.json({
+    message: `Data received successfully ${storedData} with a number of Questions = ${questionAmount} and the language is ${lan}`,
+  });
+});
+
+app.get("/main", async (req, res) => {
+  answer = await generateAnswer(storedData, questionAmount, lan);
+  text = await finishAnswer(answer, questionAmount);
+  if (answer.charAt(answer.length - 1) !== ".") {
+    text = await finishAnswer(text, questionAmount);
+  }
+  res.send(text);
+});
+
+=======
 // Route zum Hinzufügen eines Verlaufseintrags
+
 app.delete("/deleteUser/:id", async (req, res) => {
   const userId = req.params.id;
 
