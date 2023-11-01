@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { generateAnswer, finishAnswer } = require("./langchain.js");
+const { generateAnswer } = require("./langchain.js");
 const { config } = require("dotenv");
 const bodyParser = require("body-parser");
 const {
@@ -11,38 +11,19 @@ const {
   getUserHistory,
 } = require("./dbFunctions.js");
 
-// Umgebungsvariablen aus der Datei .env laden
 config();
 
-// Server erstellen
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Datenbankverbindung
 let storedData = "";
-let answer = "";
 let text = "";
 let questionAmount;
 let lan;
 
-// Middleware für die Verarbeitung von JSON-Daten
 app.use(express.json());
 
-app.post("/generateAnswer", async (req, res) => {
-  const { topic, nbQuestions, language } = req.body;
-
-  storedData = topic;
-  questionAmount = nbQuestions;
-  lan = language;
-
-  res.send(
-    `Data received successfully ${topic} with a number of Questions = ${nbQuestions} and the language is ${language}`
-  );
-});
-// ROUTEN FÜR DIE BENUTZERTABELLE
-
-// Route zum Hinzufügen eines Benutzers
 app.post("/addUser", async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -60,7 +41,6 @@ app.post("/addUser", async (req, res) => {
   }
 });
 
-// Route zum Abrufen aller Benutzer
 app.get("/getAllUsers", async (req, res) => {
   try {
     const users = await getAllUsers();
@@ -80,15 +60,26 @@ app.post("/saveData", async (req, res) => {
   });
 });
 
-app.get("/main", async (req, res) => {
-  answer = await generateAnswer(storedData, questionAmount, lan);
-  text = await finishAnswer(answer, questionAmount);
-  if (answer.charAt(answer.length - 1) !== ".") {
-    text = await finishAnswer(text, questionAmount);
-  }
-  res.send(text);
+app.post("/generateAnswer", async (req, res) => {
+  const { topic, nbQuestions, language } = req.body;
+
+  storedData = topic;
+  questionAmount = nbQuestions;
+  lan = language;
+
+  res.send(
+    `Data received successfully ${topic} with a number of Questions = ${nbQuestions} and the language is ${language}`
+  );
 });
-// Route zum Hinzufügen eines Verlaufseintrags
+
+app.get("/main", async (req, res) => {
+  let answer = "";
+  for (let i = 0; i < questionAmount; i++) {
+    answer = answer + (await generateAnswer(storedData, lan));
+  }
+
+  res.send(answer);
+});
 
 app.delete("/deleteUser/:id", async (req, res) => {
   const userId = req.params.id;
@@ -109,9 +100,6 @@ app.delete("/deleteUser/:id", async (req, res) => {
   }
 });
 
-// ROUTEN FÜR DIE VERLAUFSTABELLE
-
-// Route zum Hinzufügen eines Verlaufseintrags
 app.post("/addHistoryEntry", async (req, res) => {
   const { userId, themaId, frage, antwort } = req.body;
 
@@ -130,7 +118,6 @@ app.post("/addHistoryEntry", async (req, res) => {
   }
 });
 
-// Route zum Abrufen des Verlaufs eines Benutzers
 app.get("/getUserHistory/:userId", async (req, res) => {
   const userId = req.params.userId;
 
@@ -146,7 +133,6 @@ app.get("/getUserHistory/:userId", async (req, res) => {
   }
 });
 
-// Server starten
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);
 });

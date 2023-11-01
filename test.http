@@ -1,6 +1,6 @@
 ###
 
-POST http://localhost:5000/addUser HTTP/1.1
+POST http://localhost:3000/addUser HTTP/1.1
 Content-Type: application/json
 
 {
@@ -11,36 +11,36 @@ Content-Type: application/json
 
 ### 
 
-GET http://localhost:5000/getAllUsers HTTP/1.1
+GET http://localhost:3000/getAllUsers HTTP/1.1
 
 ###
 
-DELETE http://localhost:5000/deleteUser/1 HTTP/1.1
+DELETE http://localhost:3000/deleteUser/1 HTTP/1.1
 
 ###
 
-GET http://localhost:5000/main HTTP/1.1
+GET http://localhost:3000/main HTTP/1.1
 
 ###
 
-POST http://localhost:5000/generateAnswer HTTP/1.1
+POST http://localhost:3000/generateAnswer HTTP/1.1
 Content-Type: application/json
 
 {
-    "topic": "test",
-    "nbQuestions": 2,
+    "topic": "NodeJS",
+    "nbQuestions": "5",
     "language": "en"
 }
 
 ###
 
-DELETE http://localhost:5000/deleteUser/4 HTTP/1.1
+DELETE http://localhost:3000/deleteUser/4 HTTP/1.1
 
 ###
 
 
 
-POST http://localhost:5000/addHistoryEntry HTTP/1.1
+POST http://localhost:3000/addHistoryEntry HTTP/1.1
 Content-Type: application/json
 
 {
@@ -52,4 +52,4 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:5000/getUserHistory/4 HTTP/1.1
+GET http://localhost:3000/getUserHistory/4 HTTP/1.1
