@@ -28,8 +28,8 @@ Content-Type: application/json
 
 {
     "topic": "NodeJS",
-    "nbQuestions": "5",
-    "language": "en"
+    "nbQuestions": "4",
+    "language": "de"
 }
 
 ###

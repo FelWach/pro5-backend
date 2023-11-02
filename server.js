@@ -11,6 +11,8 @@ const {
   getUserHistory,
 } = require("./dbFunctions.js");
 
+const { extractBeforeA } = require("./helperFunctions.js");
+
 config();
 
 const app = express();
@@ -74,8 +76,14 @@ app.post("/generateAnswer", async (req, res) => {
 
 app.get("/main", async (req, res) => {
   let answer = "";
+
+  let prevQuestion = "";
+
   for (let i = 0; i < questionAmount; i++) {
-    answer = answer + (await generateAnswer(storedData, lan));
+    let generatedAnswer = await generateAnswer(storedData, lan, prevQuestion);
+    answer += generatedAnswer;
+    prevQuestion = extractBeforeA(generatedAnswer).replace(/^\s*[\r\n]/gm, "");
+    console.log(prevQuestion);
   }
 
   res.send(answer);
