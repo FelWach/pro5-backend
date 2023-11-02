@@ -1,9 +1,13 @@
 # pro5-backend
 
-update .env accordingly
+- npm install --global yarn
 
-OPENAI_API_KEY
+- yarn
 
-HUGGINGFACEHUB_API_KEY
+- update .env accordingly
 
-PORT 
+  - OPENAI_API_KEY
+
+  - HUGGINGFACEHUB_API_KEY
+
+  - PORT 
