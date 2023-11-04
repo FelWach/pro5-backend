@@ -69,12 +69,6 @@ app.post("/generateAnswer", async (req, res) => {
   questionAmount = nbQuestions;
   lan = language;
 
-  res.send(
-    `Data received successfully ${topic} with a number of Questions = ${nbQuestions} and the language is ${language}`
-  );
-});
-
-app.get("/main", async (req, res) => {
   let answer = "";
 
   let prevQuestion = "";
@@ -85,7 +79,6 @@ app.get("/main", async (req, res) => {
     prevQuestion = extractBeforeA(generatedAnswer).replace(/^\s*[\r\n]/gm, "");
     console.log(prevQuestion);
   }
-
   res.send(answer);
 });
 
