@@ -29,7 +29,10 @@ Content-Type: application/json
 {
     "topic": "Javascript",
     "nbQuestions": "4",
-    "language": "de"
+    "language": "de",
+    "languageLevel": "scientific",
+    "difficulty": "easy",
+    "temperature": "0.9"
 }
 
 ###

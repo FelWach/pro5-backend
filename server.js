@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { generateAnswer } = require("./langchain.js");
+const { generateAnswer, setConfiguration } = require("./langchain.js");
 const { config } = require("dotenv");
 const bodyParser = require("body-parser");
 const {
@@ -63,7 +63,8 @@ app.post("/saveData", async (req, res) => {
 });
 
 app.post("/generateAnswer", async (req, res) => {
-  const { topic, nbQuestions, language } = req.body;
+  const { topic, nbQuestions, language, languageLevel, difficulty, temp } =
+    req.body;
 
   storedData = topic;
   questionAmount = nbQuestions;
@@ -72,6 +73,8 @@ app.post("/generateAnswer", async (req, res) => {
   let answer = "";
 
   let prevQuestion = "";
+
+  setConfiguration(language, languageLevel, difficulty, temp);
 
   for (let i = 0; i < questionAmount; i++) {
     let generatedAnswer = await generateAnswer(storedData, lan, prevQuestion);
