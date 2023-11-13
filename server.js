@@ -63,26 +63,32 @@ app.post("/saveData", async (req, res) => {
 });
 
 app.post("/generateAnswer", async (req, res) => {
-  const { topic, nbQuestions, language, languageLevel, difficulty, temp } =
-    req.body;
+  const { topic, nbQuestions } = req.body;
 
   storedData = topic;
   questionAmount = nbQuestions;
-  lan = language;
 
   let answer = "";
 
   let prevQuestion = "";
 
-  setConfiguration(language, languageLevel, difficulty, temp);
-
   for (let i = 0; i < questionAmount; i++) {
-    let generatedAnswer = await generateAnswer(storedData, lan, prevQuestion);
+    let generatedAnswer = await generateAnswer(storedData, prevQuestion);
     answer += generatedAnswer;
     prevQuestion = extractBeforeA(generatedAnswer).replace(/^\s*[\r\n]/gm, "");
     console.log(prevQuestion);
   }
   res.send(answer);
+});
+
+app.post("/setConfiguration", async (req, res) => {
+  const { language, languageLevel, difficulty, temperature } = req.body;
+
+  setConfiguration(language, languageLevel, difficulty, temperature);
+
+  res.json({
+    message: `Configuration set successfully with the following parameters: language = ${language}, languageLevel = ${languageLevel}, difficulty = ${difficulty}, temperature = ${temperature}`,
+  });
 });
 
 app.delete("/deleteUser/:id", async (req, res) => {
