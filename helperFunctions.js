@@ -8,6 +8,20 @@ function extractBeforeA(inputString = "") {
   }
 }
 
+function splitQuestionAnswer(generatedAnswer) {
+  let questionRegex = /Q: (.+?)\n/;
+  let answerRegex = /A: (.+)/;
+
+  let questionMatch = generatedAnswer.match(questionRegex);
+  let answerMatch = generatedAnswer.match(answerRegex);
+
+  let question = questionMatch ? questionMatch[1] : "";
+  let answer = answerMatch ? answerMatch[1] : "";
+
+  return { question, answer };
+}
+
 module.exports = {
   extractBeforeA,
+  splitQuestionAnswer,
 };

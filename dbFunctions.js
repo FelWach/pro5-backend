@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt"); // Importiere die bcrypt-Bibliothek
 
 const dbPath = "./pro5.db";
 
-// Funktion zum Initialisieren der Datenbanken ... also der Tabellen (user, verlauf)
+// Funktion zum Initialisieren der Datenbanken ... also der Tabellen (user, history)
 async function initializeDatabase() {
   return new Promise((resolve, reject) => {
     const db = new sqlite3.Database(dbPath);
@@ -15,7 +15,7 @@ async function initializeDatabase() {
           reject(err);
         } else {
           db.run(
-            `CREATE TABLE IF NOT EXISTS verlauf (id INTEGER PRIMARY KEY AUTOINCREMENT, userId INTEGER, themaId INTEGER, frage TEXT, antwort TEXT)`,
+            `CREATE TABLE IF NOT EXISTS history (id INTEGER PRIMARY KEY AUTOINCREMENT, userId INTEGER, topic TEXT, frage TEXT, antwort TEXT)`,
             (err) => {
               if (err) {
                 reject(err);
@@ -106,15 +106,16 @@ async function deleteUser(id) {
 // Ab hier die Funktionen für die Verlaufstabelle
 
 // Funktion zum Hinzufügen eines Fragen/Antworten - Verlaufseintrags
-async function addHistoryEntry(userId, themaId, frage, antwort) {
+async function addHistoryEntry(userId, topic, frage, antwort) {
   return new Promise(async (resolve, reject) => {
     try {
+      await initializeDatabase();
       const db = new sqlite3.Database(dbPath);
 
       const stmt = db.prepare(
-        "INSERT INTO verlauf (userId, themaId, frage, antwort) VALUES (?, ?, ?, ?, ?)"
+        "INSERT INTO history (userId, topic, frage, antwort) VALUES (?, ?, ?, ?)"
       );
-      stmt.run(userId, themaId, frage, antwort, function (err) {
+      stmt.run(userId, topic, frage, antwort, function (err) {
         if (err) {
           reject(err);
         } else {
@@ -134,7 +135,7 @@ async function getUserHistory(userId) {
   return new Promise((resolve, reject) => {
     const db = new sqlite3.Database(dbPath);
 
-    db.all("SELECT * FROM verlauf WHERE userId = ?", [userId], (err, rows) => {
+    db.all("SELECT * FROM history WHERE userId = ?", [userId], (err, rows) => {
       if (err) {
         reject(err);
       } else {
