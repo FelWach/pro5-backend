@@ -94,14 +94,18 @@ async function deleteUserAndHistory(userId) {
           const deletedUserId = this.changes;
 
           // Nachdem der Benutzer gelöscht wurde, lösche auch alle zugehörigen Verlaufseinträge
-          db.run("DELETE FROM history WHERE userId = ?", [userId], function (err) {
-            if (err) {
-              reject(err);
-            } else {
-              const deletedHistoryEntries = this.changes;
-              resolve({ deletedUserId, deletedHistoryEntries });
+          db.run(
+            "DELETE FROM history WHERE userId = ?",
+            [userId],
+            function (err) {
+              if (err) {
+                reject(err);
+              } else {
+                const deletedHistoryEntries = this.changes;
+                resolve({ deletedUserId, deletedHistoryEntries });
+              }
             }
-          });
+          );
         }
         db.close();
       });
@@ -181,14 +185,18 @@ async function getQuestionsAndAnswers(userId) {
   return new Promise((resolve, reject) => {
     const db = new sqlite3.Database(dbPath);
 
-    db.all("SELECT id, frage as Q, antwort as A FROM history WHERE userId = ?", [userId], (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(rows);
+    db.all(
+      "SELECT id, topic, frage as Q, antwort as A FROM history WHERE userId = ?",
+      [userId],
+      (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+        db.close();
       }
-      db.close();
-    });
+    );
   });
 }
 
@@ -197,14 +205,18 @@ async function getQuestionById(questionId) {
   return new Promise((resolve, reject) => {
     const db = new sqlite3.Database(dbPath);
 
-    db.get("SELECT id, frage as Q, antwort as A FROM history WHERE id = ?", [questionId], (err, row) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(row);
+    db.get(
+      "SELECT id, topic, frage as Q, antwort as A FROM history WHERE id = ?",
+      [questionId],
+      (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row);
+        }
+        db.close();
       }
-      db.close();
-    });
+    );
   });
 }
 
@@ -213,14 +225,17 @@ async function getAllQuestionsAndAnswers() {
   return new Promise((resolve, reject) => {
     const db = new sqlite3.Database(dbPath);
 
-    db.all("SELECT id, frage as Q, antwort as A FROM history", (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(rows);
+    db.all(
+      "SELECT id, topic, frage as Q, antwort as A FROM history",
+      (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+        db.close();
       }
-      db.close();
-    });
+    );
   });
 }
 
@@ -244,8 +259,6 @@ async function getQuestionsByUserAndTopic(userId, topic) {
   });
 }
 
-
-
 // Export der Funktionen
 module.exports = {
   addUser,
@@ -257,5 +270,5 @@ module.exports = {
   getQuestionsAndAnswers,
   getQuestionById,
   getAllQuestionsAndAnswers,
-  getQuestionsByUserAndTopic
+  getQuestionsByUserAndTopic,
 };

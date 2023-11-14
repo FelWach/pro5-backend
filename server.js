@@ -13,7 +13,7 @@ const {
   getQuestionsAndAnswers,
   getQuestionById,
   getAllQuestionsAndAnswers,
-  getQuestionsByUserAndTopic
+  getQuestionsByUserAndTopic,
 } = require("./dbFunctions.js");
 
 const { extractBeforeA, splitQuestionAnswer } = require("./helperFunctions.js");
@@ -48,23 +48,13 @@ app.post("/addUser", async (req, res) => {
   }
 });
 
-app.get("/getAllUsers", async (req, res) => {
+app.get("/users", async (req, res) => {
   try {
     const users = await getAllUsers();
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: "Fehler beim Abrufen der Benutzer" });
   }
-});
-
-app.post("/saveData", async (req, res) => {
-  const { topic, nbQuestions, language } = req.body;
-  storedData = topic;
-  questionAmount = nbQuestions;
-  lan = language;
-  res.json({
-    message: `Data received successfully ${storedData} with a number of Questions = ${questionAmount} and the language is ${lan}`,
-  });
 });
 
 app.post("/generateAnswer", async (req, res) => {
@@ -84,7 +74,7 @@ app.post("/generateAnswer", async (req, res) => {
     let currentQuestion = question.trim();
     let currentAnswer = answer.trim();
 
-    addHistoryEntry(1, topic, currentQuestion, currentAnswer);
+    addHistoryEntry(8, topic, currentQuestion, currentAnswer);
     answer += generatedAnswer;
     prevQuestion = currentQuestion;
     console.log(prevQuestion);
@@ -103,8 +93,7 @@ app.post("/setConfiguration", async (req, res) => {
   });
 });
 
-// Löscht einen Benutzer und alle zugehörigen Verlaufseinträge mit der jeweiligen ID
-app.delete("/deleteUserAndHistory/:id", async (req, res) => {
+app.delete("/deleteUser/:id", async (req, res) => {
   const userId = req.params.id;
 
   if (!userId) {
@@ -114,18 +103,20 @@ app.delete("/deleteUserAndHistory/:id", async (req, res) => {
   try {
     const result = await deleteUserAndHistory(userId);
     if (result.deletedUserId > 0) {
-      res.json({ message: "Benutzer und zugehörige Verlaufseinträge wurden gelöscht" });
+      res.json({
+        message: "Benutzer und zugehörige Verlaufseinträge wurden gelöscht",
+      });
     } else {
       res.status(404).json({ message: "Benutzer nicht gefunden" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Fehler beim Löschen des Benutzers und der Verlaufseinträge" });
+    res.status(500).json({
+      message: "Fehler beim Löschen des Benutzers und der Verlaufseinträge",
+    });
   }
 });
 
-
-
-app.post("/addHistoryEntry", async (req, res) => {
+app.post("/addEntry", async (req, res) => {
   const { userId, topic, frage, antwort } = req.body;
 
   if (!userId || !topic || !frage || !antwort) {
@@ -143,7 +134,7 @@ app.post("/addHistoryEntry", async (req, res) => {
   }
 });
 
-app.get("/getUserHistory/:userId", async (req, res) => {
+app.get("/userHistory/:userId", async (req, res) => {
   const userId = req.params.userId;
 
   if (!userId) {
@@ -159,11 +150,13 @@ app.get("/getUserHistory/:userId", async (req, res) => {
 });
 
 // Löscht einen Verlaufseintrag aus der Verlaufstabelle mit der jeweiligen ID
-app.delete("/deleteHistoryEntry/:id", async (req, res) => {
+app.delete("/deleteEntry/:id", async (req, res) => {
   const historyEntryId = req.params.id;
 
   if (!historyEntryId) {
-    return res.status(400).json({ message: "Verlaufseintrags-ID erforderlich" });
+    return res
+      .status(400)
+      .json({ message: "Verlaufseintrags-ID erforderlich" });
   }
 
   try {
@@ -174,12 +167,14 @@ app.delete("/deleteHistoryEntry/:id", async (req, res) => {
       res.status(404).json({ message: "Verlaufseintrag nicht gefunden" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Fehler beim Löschen des Verlaufseintrags" });
+    res
+      .status(500)
+      .json({ message: "Fehler beim Löschen des Verlaufseintrags" });
   }
 });
 
 // Zeigt alle Fragen und Antworten eines ausgewählten Benutzers mit userId an
-app.get("/getquestionsandanswers/:userId", async (req, res) => {
+app.get("/entries/:userId", async (req, res) => {
   const userId = req.params.userId;
 
   if (!userId) {
@@ -190,12 +185,14 @@ app.get("/getquestionsandanswers/:userId", async (req, res) => {
     const questionsAndAnswers = await getQuestionsAndAnswers(userId);
     res.json(questionsAndAnswers);
   } catch (error) {
-    res.status(500).json({ message: "Fehler beim Abrufen der Fragen und Antworten" });
+    res
+      .status(500)
+      .json({ message: "Fehler beim Abrufen der Fragen und Antworten" });
   }
 });
 
 // Zeigt eine Frage mit der jeweiligen ID an
-app.get("/showQuestion/:id", async (req, res) => {
+app.get("/entry/:id", async (req, res) => {
   const questionId = req.params.id;
 
   if (!questionId) {
@@ -215,35 +212,37 @@ app.get("/showQuestion/:id", async (req, res) => {
 });
 
 // Zeigt alle Fragen und Antworten für alle Benutzer an
-app.get("/showAllQuestions", async (req, res) => {
+app.get("/entries", async (req, res) => {
   try {
     const allQuestionsAndAnswers = await getAllQuestionsAndAnswers();
     res.json(allQuestionsAndAnswers);
   } catch (error) {
-    res.status(500).json({ message: "Fehler beim Abrufen aller Fragen und Antworten" });
+    res
+      .status(500)
+      .json({ message: "Fehler beim Abrufen aller Fragen und Antworten" });
   }
 });
 
 // Zeigt alle Fragen eines Benutzers zu einem bestimmten Thema an
-app.get("/showQuestionsByUserAndTopic/:userId/:topic", async (req, res) => {
+app.get("/entries/:userId/:topic", async (req, res) => {
   const userId = req.params.userId;
   const topic = req.params.topic;
 
   if (!userId || !topic) {
-    return res.status(400).json({ message: "Benutzer-ID und Thema erforderlich" });
+    return res
+      .status(400)
+      .json({ message: "Benutzer-ID und Thema erforderlich" });
   }
 
   try {
     const questions = await getQuestionsByUserAndTopic(userId, topic);
     res.json(questions);
   } catch (error) {
-    res.status(500).json({ message: "Fehler beim Abrufen der Fragen und Antworten" });
+    res
+      .status(500)
+      .json({ message: "Fehler beim Abrufen der Fragen und Antworten" });
   }
 });
-
-
-
-
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);

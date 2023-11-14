@@ -3,18 +3,18 @@ POST http://localhost:3000/addUser HTTP/1.1
 Content-Type: application/json
 
 {
-    "name": "TestUser2",
+    "name": "TestUser",
     "email": "testuser2@example.com",
     "password": "2222"
 }
 
 
 ### Zeigt alle User an
-GET http://localhost:3000/getAllUsers HTTP/1.1
+GET http://localhost:3000/users HTTP/1.1
 
 
 ### Löscht den User mit der jeweiligen ID und alle seine Einträge in der history table (ID von user)
-DELETE http://localhost:3000/deleteUserAndHistory/6 HTTP/1.1
+DELETE http://localhost:3000/deleteUser/8 HTTP/1.1
 
 
 ### Generiert mir eine Frage und Antwort
@@ -23,7 +23,7 @@ Content-Type: application/json
 
 {
     "topic": "animals",
-    "nbQuestions": "2"
+    "nbQuestions": "3"
 }
 
 
@@ -40,11 +40,11 @@ Content-Type: application/json
 
 
 ### Fügt einen neuen Verlaufseintrag hinzu in der history table
-POST http://localhost:3000/addHistoryEntry HTTP/1.1
+POST http://localhost:3000/addEntry HTTP/1.1
 Content-Type: application/json
 
 {
-    "userId": 1,
+    "userId": 8,
     "topic": "history",
     "frage": "Hier die Frage",
     "antwort": "Hier die Antwort"
@@ -52,26 +52,26 @@ Content-Type: application/json
 
 
 ### Zeigt den Eintrag in der history table von einem User mit der jeweiligen ID an (ID von user)
-GET http://localhost:3000/getUserHistory/4 HTTP/1.1
+GET http://localhost:3000/entries/1 HTTP/1.1
 
 
 ### Löscht mir einen Eintrag aus der history table mit der jeweiligen ID (ID von history)
-DELETE http://localhost:3000/deleteHistoryEntry/1 HTTP/1.1
+DELETE http://localhost:3000/deleteEntry/1 HTTP/1.1
 
 
-###  Gibt mir alle Einträge aus der history table von einem User mit der jeweiligen ID zurück (ID von history)
-GET http://localhost:3000/getquestionsandanswers/1 HTTP/1.1
+###  Gibt alle Einträge aus dem history table von einem User mit der jeweiligen ID zurück (ID von history)
+GET http://localhost:3000/entries/8 HTTP/1.1
 
 
-### Gibt mir alle Einträge aus der history table zurück mit der jeweiligen ID (ID von history)
-GET http://localhost:3000/showQuestion/4 HTTP/1.1
+### Gibt alle Einträge aus dem history table zurück mit der jeweiligen ID (ID von history)
+GET http://localhost:3000/entry/4 HTTP/1.1
 
 
-### Gibt mir alle Einträge aus der history table zurück (ID von history)
-GET http://localhost:3000/showAllQuestions HTTP/1.1
+### Gibt alle Einträge aus dem history table zurück (ID von history)
+GET http://localhost:3000/entries HTTP/1.1
 
 ### Zeigt alle Einträge aus der history table von einem User mit der jeweiligen ID und dem jeweiligen Topic an (ID von history)
 ### (Achtung bei topic Groß- und Kleinschreibung beachten, muss gleich sein wie in der history table)
-GET http://localhost:3000/showQuestionsByUserAndTopic/1/Javascript HTTP/1.1
+GET http://localhost:3000/entries/1/Javascript HTTP/1.1
 
 
