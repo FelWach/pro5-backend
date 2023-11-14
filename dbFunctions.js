@@ -81,20 +81,28 @@ async function getAllUsers() {
   });
 }
 
-// Funktion zum Löschen eines Benutzers (mit der jeweilige ID)
-async function deleteUser(id) {
+// Funktion zum Löschen eines Benutzers und aller zugehörigen Verlaufseinträge
+async function deleteUserAndHistory(userId) {
   return new Promise(async (resolve, reject) => {
     try {
       const db = new sqlite3.Database(dbPath);
 
-      const stmt = db.prepare("DELETE FROM user WHERE id = ?");
-      stmt.run(id, function (err) {
+      db.run("DELETE FROM user WHERE id = ?", [userId], function (err) {
         if (err) {
           reject(err);
         } else {
-          resolve(this.changes);
+          const deletedUserId = this.changes;
+
+          // Nachdem der Benutzer gelöscht wurde, lösche auch alle zugehörigen Verlaufseinträge
+          db.run("DELETE FROM history WHERE userId = ?", [userId], function (err) {
+            if (err) {
+              reject(err);
+            } else {
+              const deletedHistoryEntries = this.changes;
+              resolve({ deletedUserId, deletedHistoryEntries });
+            }
+          });
         }
-        stmt.finalize();
         db.close();
       });
     } catch (error) {
@@ -146,11 +154,108 @@ async function getUserHistory(userId) {
   });
 }
 
+// Funktion zum Löschen eines Verlaufseintrags (mit der jeweiligen ID)
+async function deleteHistoryEntry(id) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const db = new sqlite3.Database(dbPath);
+
+      const stmt = db.prepare("DELETE FROM history WHERE id = ?");
+      stmt.run(id, function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(this.changes);
+        }
+        stmt.finalize();
+        db.close();
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+// Funktion zum Abrufen aller Fragen und Antworten eines Benutzers
+async function getQuestionsAndAnswers(userId) {
+  return new Promise((resolve, reject) => {
+    const db = new sqlite3.Database(dbPath);
+
+    db.all("SELECT id, frage as Q, antwort as A FROM history WHERE userId = ?", [userId], (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+      db.close();
+    });
+  });
+}
+
+// Funktion zum Abrufen einer Frage mit einer bestimmten ID
+async function getQuestionById(questionId) {
+  return new Promise((resolve, reject) => {
+    const db = new sqlite3.Database(dbPath);
+
+    db.get("SELECT id, frage as Q, antwort as A FROM history WHERE id = ?", [questionId], (err, row) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(row);
+      }
+      db.close();
+    });
+  });
+}
+
+// Funktion zum Abrufen aller Fragen und Antworten für alle Benutzer
+async function getAllQuestionsAndAnswers() {
+  return new Promise((resolve, reject) => {
+    const db = new sqlite3.Database(dbPath);
+
+    db.all("SELECT id, frage as Q, antwort as A FROM history", (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+      db.close();
+    });
+  });
+}
+
+// Funktion zum Abrufen aller Fragen eines Benutzers zu einem bestimmten Thema
+async function getQuestionsByUserAndTopic(userId, topic) {
+  return new Promise((resolve, reject) => {
+    const db = new sqlite3.Database(dbPath);
+
+    db.all(
+      "SELECT id, topic, frage as Q, antwort as A FROM history WHERE userId = ? AND topic = ?",
+      [userId, topic],
+      (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+        db.close();
+      }
+    );
+  });
+}
+
+
+
 // Export der Funktionen
 module.exports = {
   addUser,
   getAllUsers,
-  deleteUser,
+  deleteUserAndHistory,
   addHistoryEntry,
   getUserHistory,
+  deleteHistoryEntry,
+  getQuestionsAndAnswers,
+  getQuestionById,
+  getAllQuestionsAndAnswers,
+  getQuestionsByUserAndTopic
 };
