@@ -6,9 +6,14 @@ const bodyParser = require("body-parser");
 const {
   addUser,
   getAllUsers,
-  deleteUser,
+  deleteUserAndHistory,
   addHistoryEntry,
   getUserHistory,
+  deleteHistoryEntry,
+  getQuestionsAndAnswers,
+  getQuestionById,
+  getAllQuestionsAndAnswers,
+  getQuestionsByUserAndTopic
 } = require("./dbFunctions.js");
 
 const { extractBeforeA, splitQuestionAnswer } = require("./helperFunctions.js");
@@ -98,7 +103,8 @@ app.post("/setConfiguration", async (req, res) => {
   });
 });
 
-app.delete("/deleteUser/:id", async (req, res) => {
+// Löscht einen Benutzer und alle zugehörigen Verlaufseinträge mit der jeweiligen ID
+app.delete("/deleteUserAndHistory/:id", async (req, res) => {
   const userId = req.params.id;
 
   if (!userId) {
@@ -106,27 +112,29 @@ app.delete("/deleteUser/:id", async (req, res) => {
   }
 
   try {
-    const deletedCount = await deleteUser(userId);
-    if (deletedCount > 0) {
-      res.json({ message: "Benutzer wurde gelöscht" });
+    const result = await deleteUserAndHistory(userId);
+    if (result.deletedUserId > 0) {
+      res.json({ message: "Benutzer und zugehörige Verlaufseinträge wurden gelöscht" });
     } else {
       res.status(404).json({ message: "Benutzer nicht gefunden" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Fehler beim Löschen des Benutzers" });
+    res.status(500).json({ message: "Fehler beim Löschen des Benutzers und der Verlaufseinträge" });
   }
 });
 
-app.post("/addHistoryEntry", async (req, res) => {
-  const { userId, themaId, frage, antwort } = req.body;
 
-  if (!userId || !themaId || !frage || !antwort) {
+
+app.post("/addHistoryEntry", async (req, res) => {
+  const { userId, topic, frage, antwort } = req.body;
+
+  if (!userId || !topic || !frage || !antwort) {
     return res.status(400).json({ message: "Ungültige Anfrage" });
   }
 
   try {
     // Verlaufseintrag hinzufügen
-    await addHistoryEntry(userId, themaId, frage, antwort);
+    await addHistoryEntry(userId, topic, frage, antwort);
     res.json({ message: "Verlaufseintrag hinzugefügt" });
   } catch (error) {
     res
@@ -149,6 +157,93 @@ app.get("/getUserHistory/:userId", async (req, res) => {
     res.status(500).json({ message: "Fehler beim Abrufen des Verlaufs" });
   }
 });
+
+// Löscht einen Verlaufseintrag aus der Verlaufstabelle mit der jeweiligen ID
+app.delete("/deleteHistoryEntry/:id", async (req, res) => {
+  const historyEntryId = req.params.id;
+
+  if (!historyEntryId) {
+    return res.status(400).json({ message: "Verlaufseintrags-ID erforderlich" });
+  }
+
+  try {
+    const deletedCount = await deleteHistoryEntry(historyEntryId);
+    if (deletedCount > 0) {
+      res.json({ message: "Verlaufseintrag wurde gelöscht" });
+    } else {
+      res.status(404).json({ message: "Verlaufseintrag nicht gefunden" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Fehler beim Löschen des Verlaufseintrags" });
+  }
+});
+
+// Zeigt alle Fragen und Antworten eines ausgewählten Benutzers mit userId an
+app.get("/getquestionsandanswers/:userId", async (req, res) => {
+  const userId = req.params.userId;
+
+  if (!userId) {
+    return res.status(400).json({ message: "Benutzer-ID erforderlich" });
+  }
+
+  try {
+    const questionsAndAnswers = await getQuestionsAndAnswers(userId);
+    res.json(questionsAndAnswers);
+  } catch (error) {
+    res.status(500).json({ message: "Fehler beim Abrufen der Fragen und Antworten" });
+  }
+});
+
+// Zeigt eine Frage mit der jeweiligen ID an
+app.get("/showQuestion/:id", async (req, res) => {
+  const questionId = req.params.id;
+
+  if (!questionId) {
+    return res.status(400).json({ message: "Frage-ID erforderlich" });
+  }
+
+  try {
+    const question = await getQuestionById(questionId);
+    if (question) {
+      res.json(question);
+    } else {
+      res.status(404).json({ message: "Frage nicht gefunden" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Fehler beim Abrufen der Frage" });
+  }
+});
+
+// Zeigt alle Fragen und Antworten für alle Benutzer an
+app.get("/showAllQuestions", async (req, res) => {
+  try {
+    const allQuestionsAndAnswers = await getAllQuestionsAndAnswers();
+    res.json(allQuestionsAndAnswers);
+  } catch (error) {
+    res.status(500).json({ message: "Fehler beim Abrufen aller Fragen und Antworten" });
+  }
+});
+
+// Zeigt alle Fragen eines Benutzers zu einem bestimmten Thema an
+app.get("/showQuestionsByUserAndTopic/:userId/:topic", async (req, res) => {
+  const userId = req.params.userId;
+  const topic = req.params.topic;
+
+  if (!userId || !topic) {
+    return res.status(400).json({ message: "Benutzer-ID und Thema erforderlich" });
+  }
+
+  try {
+    const questions = await getQuestionsByUserAndTopic(userId, topic);
+    res.json(questions);
+  } catch (error) {
+    res.status(500).json({ message: "Fehler beim Abrufen der Fragen und Antworten" });
+  }
+});
+
+
+
+
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);
