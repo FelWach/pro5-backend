@@ -74,7 +74,7 @@ app.post("/generateAnswer", async (req, res) => {
     let currentQuestion = question.trim();
     let currentAnswer = answer.trim();
 
-    addHistoryEntry(8, topic, currentQuestion, currentAnswer);
+    addHistoryEntry(1, topic, currentQuestion, currentAnswer);
     answer += generatedAnswer;
     prevQuestion = currentQuestion;
     console.log(prevQuestion);
@@ -134,7 +134,7 @@ app.post("/addEntry", async (req, res) => {
   }
 });
 
-app.get("/userHistory/:userId", async (req, res) => {
+app.get("/entries/:userId", async (req, res) => {
   const userId = req.params.userId;
 
   if (!userId) {
@@ -170,24 +170,6 @@ app.delete("/deleteEntry/:id", async (req, res) => {
     res
       .status(500)
       .json({ message: "Fehler beim Löschen des Verlaufseintrags" });
-  }
-});
-
-// Zeigt alle Fragen und Antworten eines ausgewählten Benutzers mit userId an
-app.get("/entries/:userId", async (req, res) => {
-  const userId = req.params.userId;
-
-  if (!userId) {
-    return res.status(400).json({ message: "Benutzer-ID erforderlich" });
-  }
-
-  try {
-    const questionsAndAnswers = await getQuestionsAndAnswers(userId);
-    res.json(questionsAndAnswers);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Fehler beim Abrufen der Fragen und Antworten" });
   }
 });
 
