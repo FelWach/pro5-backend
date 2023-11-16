@@ -5,7 +5,10 @@ const {
   getEntry,
   getEntries,
   getEntriesWithTopic,
-} = require("../dbFunctions.js");
+  getTopic,
+} = require("../db/dbFunctions.js");
+
+const { compareLanguages } = require("../langchain.js");
 
 const express = require("express");
 const router = express.Router();
@@ -18,7 +21,6 @@ router.post("/addEntry", async (req, res) => {
   }
 
   try {
-    // Verlaufseintrag hinzufügen
     await addEntry(userId, topic, frage, antwort);
     res.json({ message: "Verlaufseintrag hinzugefügt" });
   } catch (error) {

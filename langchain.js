@@ -40,7 +40,10 @@ async function generateAnswer(topic, prevQuestion = "") {
   return res;
 }
 
+async function compareLanguages() {}
+
 module.exports = {
   generateAnswer,
   setConfiguration,
+  compareLanguages,
 };

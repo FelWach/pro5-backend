@@ -1,14 +1,13 @@
 const { generateAnswer, setConfiguration } = require("../langchain.js");
-const { addEntry } = require("../dbFunctions.js");
+const { addEntry } = require("../db/dbFunctions.js");
 const { splitQuestionAnswer } = require("../helperFunctions.js");
 
 const express = require("express");
 const router = express.Router();
 
-router.post("/generateAnswer", async (req, res) => {
+router.post("/generate", async (req, res) => {
   const { topic, nbQuestions } = req.body;
 
-  storedData = topic;
   questionAmount = nbQuestions;
 
   let answer = "";
@@ -16,7 +15,7 @@ router.post("/generateAnswer", async (req, res) => {
   let prevQuestion = "";
 
   for (let i = 0; i < questionAmount; i++) {
-    let generatedAnswer = await generateAnswer(storedData, prevQuestion);
+    let generatedAnswer = await generateAnswer(topic, prevQuestion);
     let { question, answer } = splitQuestionAnswer(generatedAnswer);
 
     let currentQuestion = question.trim();
@@ -28,7 +27,32 @@ router.post("/generateAnswer", async (req, res) => {
     console.log(prevQuestion);
   }
 
-  res.send(answer);
+  res.send("Entry generated and stored in database");
+});
+
+router.post("/generate/:topic", async (req, res) => {
+  const { nbQuestions } = req.body;
+  topic = req.params.topic;
+
+  questionAmount = nbQuestions;
+  let answer = "";
+
+  let prevQuestion = "";
+
+  for (let i = 0; i < questionAmount; i++) {
+    let generatedAnswer = await generateAnswer(topic, prevQuestion);
+    let { question, answer } = splitQuestionAnswer(generatedAnswer);
+
+    let currentQuestion = question.trim();
+    let currentAnswer = answer.trim();
+
+    addEntry(1, topic, currentQuestion, currentAnswer);
+    answer += generatedAnswer;
+    prevQuestion = currentQuestion;
+    console.log(prevQuestion);
+  }
+
+  res.send("Entry generated and stored in database");
 });
 
 router.post("/setConfiguration", async (req, res) => {
