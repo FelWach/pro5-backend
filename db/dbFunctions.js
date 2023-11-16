@@ -239,6 +239,25 @@ async function getEntriesWithTopic(userId, topic) {
   });
 }
 
+async function getTopic(userId) {
+  return new Promise((resolve, reject) => {
+    const db = new sqlite3.Database(dbPath);
+
+    db.all(
+      "SELECT topic FROM history WHERE userId = ?",
+      [userId],
+      (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+        db.close();
+      }
+    );
+  });
+}
+
 // Export der Funktionen
 module.exports = {
   addUser,
@@ -250,4 +269,5 @@ module.exports = {
   getEntry,
   getEntries,
   getEntriesWithTopic,
+  getTopic,
 };

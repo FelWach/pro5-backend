@@ -1,4 +1,4 @@
-const { addUser, getAllUsers, deleteUser } = require("../dbFunctions.js");
+const { addUser, getAllUsers, deleteUser } = require("../db/dbFunctions");
 
 const express = require("express");
 const router = express.Router();
