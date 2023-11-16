@@ -1,7 +1,7 @@
 const sqlite3 = require("sqlite3").verbose(); // Importiere die sqlite3-Bibliothek
 const bcrypt = require("bcrypt"); // Importiere die bcrypt-Bibliothek
 
-const dbPath = "./pro5.db";
+const dbPath = "./db/pro5.db";
 
 // Funktion zum Initialisieren der Datenbanken ... also der Tabellen (user, history)
 async function initializeDatabase() {
