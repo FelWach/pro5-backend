@@ -31,7 +31,7 @@ async function initializeDatabase() {
   });
 }
 
-// Ab hier die Funktionen für die Usertabelle
+// Ab hier die Funktionen für die Tabelle user
 
 // Funktion zum Hinzufügen eines Benutzers
 async function addUser(name, email, password) {
@@ -82,7 +82,7 @@ async function getAllUsers() {
 }
 
 // Funktion zum Löschen eines Benutzers und aller zugehörigen Verlaufseinträge
-async function deleteUserAndHistory(userId) {
+async function deleteUser(userId) {
   return new Promise(async (resolve, reject) => {
     try {
       const db = new sqlite3.Database(dbPath);
@@ -115,10 +115,10 @@ async function deleteUserAndHistory(userId) {
   });
 }
 
-// Ab hier die Funktionen für die Verlaufstabelle
+// Ab hier die Funktionen für die Tabelle history
 
 // Funktion zum Hinzufügen eines Fragen/Antworten - Verlaufseintrags
-async function addHistoryEntry(userId, topic, frage, antwort) {
+async function addEntry(userId, topic, frage, antwort) {
   return new Promise(async (resolve, reject) => {
     try {
       await initializeDatabase();
@@ -143,7 +143,7 @@ async function addHistoryEntry(userId, topic, frage, antwort) {
 }
 
 // Funktion zum Abrufen des Fragen/Antworten - Verlaufs eines Benutzers
-async function getUserHistory(userId) {
+async function getUserEntries(userId) {
   return new Promise((resolve, reject) => {
     const db = new sqlite3.Database(dbPath);
 
@@ -159,7 +159,7 @@ async function getUserHistory(userId) {
 }
 
 // Funktion zum Löschen eines Verlaufseintrags (mit der jeweiligen ID)
-async function deleteHistoryEntry(id) {
+async function deleteEntry(id) {
   return new Promise(async (resolve, reject) => {
     try {
       const db = new sqlite3.Database(dbPath);
@@ -180,28 +180,8 @@ async function deleteHistoryEntry(id) {
   });
 }
 
-// Funktion zum Abrufen aller Fragen und Antworten eines Benutzers
-async function getQuestionsAndAnswers(userId) {
-  return new Promise((resolve, reject) => {
-    const db = new sqlite3.Database(dbPath);
-
-    db.all(
-      "SELECT id, topic, frage as Q, antwort as A FROM history WHERE userId = ?",
-      [userId],
-      (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows);
-        }
-        db.close();
-      }
-    );
-  });
-}
-
 // Funktion zum Abrufen einer Frage mit einer bestimmten ID
-async function getQuestionById(questionId) {
+async function getEntry(questionId) {
   return new Promise((resolve, reject) => {
     const db = new sqlite3.Database(dbPath);
 
@@ -221,7 +201,7 @@ async function getQuestionById(questionId) {
 }
 
 // Funktion zum Abrufen aller Fragen und Antworten für alle Benutzer
-async function getAllQuestionsAndAnswers() {
+async function getEntries() {
   return new Promise((resolve, reject) => {
     const db = new sqlite3.Database(dbPath);
 
@@ -240,7 +220,7 @@ async function getAllQuestionsAndAnswers() {
 }
 
 // Funktion zum Abrufen aller Fragen eines Benutzers zu einem bestimmten Thema
-async function getQuestionsByUserAndTopic(userId, topic) {
+async function getEntriesWithTopic(userId, topic) {
   return new Promise((resolve, reject) => {
     const db = new sqlite3.Database(dbPath);
 
@@ -263,12 +243,11 @@ async function getQuestionsByUserAndTopic(userId, topic) {
 module.exports = {
   addUser,
   getAllUsers,
-  deleteUserAndHistory,
-  addHistoryEntry,
-  getUserHistory,
-  deleteHistoryEntry,
-  getQuestionsAndAnswers,
-  getQuestionById,
-  getAllQuestionsAndAnswers,
-  getQuestionsByUserAndTopic,
+  deleteUser,
+  addEntry,
+  getUserEntries,
+  deleteEntry,
+  getEntry,
+  getEntries,
+  getEntriesWithTopic,
 };
