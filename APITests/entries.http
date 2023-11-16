@@ -1,0 +1,35 @@
+
+### Fügt einen neuen Eintrag in den history table ein
+POST http://localhost:3000/addEntry HTTP/1.1
+Content-Type: application/json
+
+{
+    "userId": 8,
+    "topic": "history",
+    "frage": "Hier die Frage",
+    "antwort": "Hier die Antwort"
+}
+
+
+### Gibt alle Einträge aus dem history table eines Users mit der ID zurück
+GET http://localhost:3000/entries/1 HTTP/1.1
+
+
+### Gibt den Eintrag mit der ID aus dem history table zurück
+GET http://localhost:3000/entry/30 HTTP/1.1
+
+
+### Gibt alle Einträge aus dem history table zurück
+GET http://localhost:3000/entries HTTP/1.1
+
+
+### Gibt alle Einträge eines Users mit ID und dem Topic zurück
+GET http://localhost:3000/entries/1/Hockey HTTP/1.1
+
+
+### Löscht den Eintrag mit ID aus dem history table
+DELETE http://localhost:3000/deleteEntry/28 HTTP/1.1
+
+
+
+
