@@ -17,16 +17,14 @@ router.post("/addEntry", async (req, res) => {
   const { userId, topic, frage, antwort } = req.body;
 
   if (!userId || !topic || !frage || !antwort) {
-    return res.status(400).json({ message: "Ungültige Anfrage" });
+    return res.status(400).json({ message: "Missing request data!" });
   }
 
   try {
     await addEntry(userId, topic, frage, antwort);
-    res.json({ message: "Verlaufseintrag hinzugefügt" });
+    res.json({ message: "Entry added successfully!" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Fehler beim Hinzufügen des Verlaufseintrags" });
+    res.status(500).json({ message: "Error while adding entry!" });
   }
 });
 
@@ -34,14 +32,14 @@ router.get("/entries/:userId", async (req, res) => {
   const userId = req.params.userId;
 
   if (!userId) {
-    return res.status(400).json({ message: "Benutzer-ID erforderlich" });
+    return res.status(400).json({ message: "User ID required!" });
   }
 
   try {
     const userHistory = await getUserEntries(userId);
     res.json(userHistory);
   } catch (error) {
-    res.status(500).json({ message: "Fehler beim Abrufen des Verlaufs" });
+    res.status(500).json({ message: "Error while fetching user history!" });
   }
 });
 
@@ -50,22 +48,18 @@ router.delete("/deleteEntry/:id", async (req, res) => {
   const historyEntryId = req.params.id;
 
   if (!historyEntryId) {
-    return res
-      .status(400)
-      .json({ message: "Verlaufseintrags-ID erforderlich" });
+    return res.status(400).json({ message: "Entry ID required!" });
   }
 
   try {
     const deletedCount = await deleteEntry(historyEntryId);
     if (deletedCount > 0) {
-      res.json({ message: "Verlaufseintrag wurde gelöscht" });
+      res.json({ message: "Entry deleted successfully!" });
     } else {
-      res.status(404).json({ message: "Verlaufseintrag nicht gefunden" });
+      res.status(404).json({ message: "Entry not found!" });
     }
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Fehler beim Löschen des Verlaufseintrags" });
+    res.status(500).json({ message: "Error while deleting entry!" });
   }
 });
 
@@ -74,7 +68,7 @@ router.get("/entry/:id", async (req, res) => {
   const questionId = req.params.id;
 
   if (!questionId) {
-    return res.status(400).json({ message: "Frage-ID erforderlich" });
+    return res.status(400).json({ message: "Entry ID required!" });
   }
 
   try {
@@ -82,10 +76,10 @@ router.get("/entry/:id", async (req, res) => {
     if (question) {
       res.json(question);
     } else {
-      res.status(404).json({ message: "Frage nicht gefunden" });
+      res.status(404).json({ message: "Entry not found!" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Fehler beim Abrufen der Frage" });
+    res.status(500).json({ message: "Error while fetching entry!" });
   }
 });
 
@@ -95,9 +89,7 @@ router.get("/entries", async (req, res) => {
     const allQuestionsAndAnswers = await getEntries();
     res.json(allQuestionsAndAnswers);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Fehler beim Abrufen aller Fragen und Antworten" });
+    res.status(500).json({ message: "Error while fetching entries!" });
   }
 });
 
@@ -107,18 +99,14 @@ router.get("/entries/:userId/:topic", async (req, res) => {
   const topic = req.params.topic;
 
   if (!userId || !topic) {
-    return res
-      .status(400)
-      .json({ message: "Benutzer-ID und Thema erforderlich" });
+    return res.status(400).json({ message: "User ID and topic required!" });
   }
 
   try {
     const questions = await getEntriesWithTopic(userId, topic);
     res.json(questions);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Fehler beim Abrufen der Fragen und Antworten" });
+    res.status(500).json({ message: "Error while fetching entries!" });
   }
 });
 

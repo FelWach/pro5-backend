@@ -27,7 +27,7 @@ router.post("/generate", async (req, res) => {
     console.log(prevQuestion);
   }
 
-  res.send("Entry generated and stored in database");
+  res.send("Entry generated and stored in database!");
 });
 
 router.post("/generate/:topic", async (req, res) => {
@@ -52,7 +52,7 @@ router.post("/generate/:topic", async (req, res) => {
     console.log(prevQuestion);
   }
 
-  res.send("Entry generated and stored in database");
+  res.send("Entry generated and stored in database!");
 });
 
 router.post("/setConfiguration", async (req, res) => {
