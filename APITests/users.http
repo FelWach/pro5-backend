@@ -14,4 +14,27 @@ GET http://localhost:3000/users HTTP/1.1
 
 
 ### Löscht den User mit der ID und alle seine Einträge im history table
-DELETE http://localhost:3000/deleteUser/9 HTTP/1.1
+DELETE http://localhost:3000/deleteUser/10 HTTP/1.1
+
+
+### Login mit Benutzername oder E-Mail und Passwort
+POST http://localhost:3000/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "usernameOrEmail": "user",
+    "password": "DieAppistToll"
+}
+
+
+### Registrierung eines neuen Benutzers
+POST http://localhost:3000/register HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "user",
+    "email": "user@example.com",
+    "password": "DieAppistToll"
+}
+
+

@@ -1,7 +1,8 @@
 const sqlite3 = require("sqlite3").verbose(); // Importiere die sqlite3-Bibliothek
 const bcrypt = require("bcrypt"); // Importiere die bcrypt-Bibliothek
 
-const dbPath = "./pro5.db";
+const dbPath = "./db/pro5.db";
+
 
 // Funktion zum Initialisieren der Datenbanken ... also der Tabellen (user, history)
 async function initializeDatabase() {
@@ -31,7 +32,6 @@ async function initializeDatabase() {
   });
 }
 
-// Ab hier die Funktionen für die Tabelle user
 
 // Funktion zum Hinzufügen eines Benutzers
 async function addUser(name, email, password) {
@@ -65,6 +65,7 @@ async function addUser(name, email, password) {
   });
 }
 
+
 // Funktion zum Abrufen aller Benutzer
 async function getAllUsers() {
   return new Promise((resolve, reject) => {
@@ -80,6 +81,7 @@ async function getAllUsers() {
     });
   });
 }
+
 
 // Funktion zum Löschen eines Benutzers und aller zugehörigen Verlaufseinträge
 async function deleteUser(userId) {
@@ -115,7 +117,6 @@ async function deleteUser(userId) {
   });
 }
 
-// Ab hier die Funktionen für die Tabelle history
 
 // Funktion zum Hinzufügen eines Fragen/Antworten - Verlaufseintrags
 async function addEntry(userId, topic, frage, antwort) {
@@ -142,6 +143,7 @@ async function addEntry(userId, topic, frage, antwort) {
   });
 }
 
+
 // Funktion zum Abrufen des Fragen/Antworten - Verlaufs eines Benutzers
 async function getUserEntries(userId) {
   return new Promise((resolve, reject) => {
@@ -157,6 +159,7 @@ async function getUserEntries(userId) {
     });
   });
 }
+
 
 // Funktion zum Löschen eines Verlaufseintrags (mit der jeweiligen ID)
 async function deleteEntry(id) {
@@ -180,6 +183,7 @@ async function deleteEntry(id) {
   });
 }
 
+
 // Funktion zum Abrufen einer Frage mit einer bestimmten ID
 async function getEntry(questionId) {
   return new Promise((resolve, reject) => {
@@ -200,6 +204,7 @@ async function getEntry(questionId) {
   });
 }
 
+
 // Funktion zum Abrufen aller Fragen und Antworten für alle Benutzer
 async function getEntries() {
   return new Promise((resolve, reject) => {
@@ -218,6 +223,7 @@ async function getEntries() {
     );
   });
 }
+
 
 // Funktion zum Abrufen aller Fragen eines Benutzers zu einem bestimmten Thema
 async function getEntriesWithTopic(userId, topic) {
@@ -239,6 +245,8 @@ async function getEntriesWithTopic(userId, topic) {
   });
 }
 
+
+// Funktion zum Abrufen aller Themen eines Benutzers
 async function getTopic(userId) {
   return new Promise((resolve, reject) => {
     const db = new sqlite3.Database(dbPath);
@@ -258,6 +266,57 @@ async function getTopic(userId) {
   });
 }
 
+
+// Funktion zum Abrufen der Daten eines Benutzers für den Login
+async function getDataForLogin(nameOrEmail) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await initializeDatabase();
+      const db = new sqlite3.Database(dbPath);
+
+      const query = 'SELECT * FROM user WHERE name = ? OR email = ?';
+      const params = [nameOrEmail, nameOrEmail];
+
+      db.get(query, params, (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row);
+        }
+        db.close();
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+
+// Funktion zum Abrufen der Daten eines Benutzers für die Registrierung
+async function getDataForRegistration(name, email) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await initializeDatabase();
+      const db = new sqlite3.Database(dbPath);
+
+      const query = 'SELECT * FROM user WHERE name = ? OR email = ?';
+      const params = [name, email];
+
+      db.get(query, params, (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row);
+        }
+        db.close();
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+
 // Export der Funktionen
 module.exports = {
   addUser,
@@ -270,4 +329,8 @@ module.exports = {
   getEntries,
   getEntriesWithTopic,
   getTopic,
+  getDataForLogin,
+  getDataForRegistration,
 };
+
+
