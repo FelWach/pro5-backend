@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt"); // Importiere die bcrypt-Bibliothek
 
 const dbPath = "./db/pro5.db";
 
-
 // Funktion zum Initialisieren der Datenbanken ... also der Tabellen (user, history)
 async function initializeDatabase() {
   return new Promise((resolve, reject) => {
