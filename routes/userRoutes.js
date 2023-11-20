@@ -4,6 +4,7 @@ const {
   deleteUser,
   getDataForLogin,
   getDataForRegistration,
+  updateUser,
 } = require("../db/dbFunctions");
 
 const express = require("express");
@@ -58,6 +59,31 @@ router.delete("/deleteUser/:id", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Error while deleting user and associated history entries",
+    });
+  }
+});
+
+router.put("/updateUser/:id", async (req, res) => {
+  const userId = req.params.id;
+  const { oldPassword, ...updatedData } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID missing!" });
+  }
+
+  try {
+    const result = await updateUser(userId, updatedData, oldPassword);
+    if (result.updatedUserId > 0) {
+      res.json({
+        message: "User successfully updated",
+      });
+    } else {
+      res.status(404).json({ message: "User not found!" });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Error while updating user",
+      error: error.message,
     });
   }
 });
