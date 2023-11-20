@@ -3,14 +3,26 @@ POST http://localhost:3000/addUser HTTP/1.1
 Content-Type: application/json
 
 {
-    "name": "User",
-    "email": "testuser2@example.com",
+    "name": "User1",
+    "email": "testuser1@example.com",
     "password": "Password"
 }
 
 
 ### Zeigt alle User an
 GET http://localhost:3000/users HTTP/1.1
+
+###
+
+PUT http://localhost:3000/updateUser/15 HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "User111",
+    "email": "test@test.com",
+    "oldPassword": "Password2",
+    "password": "Password1"
+}
 
 
 ### Löscht den User mit der ID und alle seine Einträge im history table

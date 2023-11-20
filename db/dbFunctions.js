@@ -31,7 +31,6 @@ async function initializeDatabase() {
   });
 }
 
-
 // Funktion zum Hinzufügen eines Benutzers
 async function addUser(name, email, password) {
   return new Promise(async (resolve, reject) => {
@@ -64,7 +63,6 @@ async function addUser(name, email, password) {
   });
 }
 
-
 // Funktion zum Abrufen aller Benutzer
 async function getAllUsers() {
   return new Promise((resolve, reject) => {
@@ -80,7 +78,6 @@ async function getAllUsers() {
     });
   });
 }
-
 
 // Funktion zum Löschen eines Benutzers und aller zugehörigen Verlaufseinträge
 async function deleteUser(userId) {
@@ -116,6 +113,90 @@ async function deleteUser(userId) {
   });
 }
 
+async function updateUser(userId, updatedData, oldPassword) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const db = new sqlite3.Database(dbPath);
+
+      if (updatedData.password && !oldPassword) {
+        reject(
+          new Error("Old password is required for updating the password.")
+        );
+        db.close();
+        return;
+      }
+
+      const getUserQuery = "SELECT * FROM user WHERE id = ?";
+      db.get(getUserQuery, [userId], async (err, user) => {
+        if (err) {
+          reject(err);
+          db.close();
+          return;
+        }
+
+        if (!user) {
+          reject(new Error("User not found."));
+          db.close();
+          return;
+        }
+
+        if (updatedData.password && oldPassword) {
+          const isOldPasswordValid = await bcrypt.compare(
+            oldPassword,
+            user.password
+          );
+
+          if (!isOldPasswordValid) {
+            reject(new Error("Old password is incorrect."));
+            db.close();
+            return;
+          }
+        }
+
+        const updateFields = [];
+        const updateValues = [];
+
+        if (updatedData.name) {
+          updateFields.push("name = ?");
+          updateValues.push(updatedData.name);
+        }
+
+        if (updatedData.email) {
+          updateFields.push("email = ?");
+          updateValues.push(updatedData.email);
+        }
+
+        if (updatedData.password) {
+          const hashedPassword = await bcrypt.hash(updatedData.password, 10);
+          updateFields.push("password = ?");
+          updateValues.push(hashedPassword);
+        }
+
+        if (updateFields.length === 0) {
+          reject(new Error("No valid fields provided for update."));
+          db.close();
+          return;
+        }
+
+        const updateQuery = `UPDATE user SET ${updateFields.join(
+          ", "
+        )} WHERE id = ?`;
+
+        db.run(updateQuery, [...updateValues, userId], function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            const updatedUserId = this.changes;
+            resolve({ updatedUserId });
+          }
+          db.close();
+        });
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
 
 // Funktion zum Hinzufügen eines Fragen/Antworten - Verlaufseintrags
 async function addEntry(userId, topic, frage, antwort) {
@@ -142,7 +223,6 @@ async function addEntry(userId, topic, frage, antwort) {
   });
 }
 
-
 // Funktion zum Abrufen des Fragen/Antworten - Verlaufs eines Benutzers
 async function getUserEntries(userId) {
   return new Promise((resolve, reject) => {
@@ -158,7 +238,6 @@ async function getUserEntries(userId) {
     });
   });
 }
-
 
 // Funktion zum Löschen eines Verlaufseintrags (mit der jeweiligen ID)
 async function deleteEntry(id) {
@@ -182,7 +261,6 @@ async function deleteEntry(id) {
   });
 }
 
-
 // Funktion zum Abrufen einer Frage mit einer bestimmten ID
 async function getEntry(questionId) {
   return new Promise((resolve, reject) => {
@@ -203,7 +281,6 @@ async function getEntry(questionId) {
   });
 }
 
-
 // Funktion zum Abrufen aller Fragen und Antworten für alle Benutzer
 async function getEntries() {
   return new Promise((resolve, reject) => {
@@ -222,7 +299,6 @@ async function getEntries() {
     );
   });
 }
-
 
 // Funktion zum Abrufen aller Fragen eines Benutzers zu einem bestimmten Thema
 async function getEntriesWithTopic(userId, topic) {
@@ -244,7 +320,6 @@ async function getEntriesWithTopic(userId, topic) {
   });
 }
 
-
 // Funktion zum Abrufen aller Themen eines Benutzers
 async function getTopic(userId) {
   return new Promise((resolve, reject) => {
@@ -265,7 +340,6 @@ async function getTopic(userId) {
   });
 }
 
-
 // Funktion zum Abrufen der Daten eines Benutzers für den Login
 async function getDataForLogin(nameOrEmail) {
   return new Promise(async (resolve, reject) => {
@@ -273,7 +347,7 @@ async function getDataForLogin(nameOrEmail) {
       await initializeDatabase();
       const db = new sqlite3.Database(dbPath);
 
-      const query = 'SELECT * FROM user WHERE name = ? OR email = ?';
+      const query = "SELECT * FROM user WHERE name = ? OR email = ?";
       const params = [nameOrEmail, nameOrEmail];
 
       db.get(query, params, (err, row) => {
@@ -290,7 +364,6 @@ async function getDataForLogin(nameOrEmail) {
   });
 }
 
-
 // Funktion zum Abrufen der Daten eines Benutzers für die Registrierung
 async function getDataForRegistration(name, email) {
   return new Promise(async (resolve, reject) => {
@@ -298,7 +371,7 @@ async function getDataForRegistration(name, email) {
       await initializeDatabase();
       const db = new sqlite3.Database(dbPath);
 
-      const query = 'SELECT * FROM user WHERE name = ? OR email = ?';
+      const query = "SELECT * FROM user WHERE name = ? OR email = ?";
       const params = [name, email];
 
       db.get(query, params, (err, row) => {
@@ -315,7 +388,6 @@ async function getDataForRegistration(name, email) {
   });
 }
 
-
 // Export der Funktionen
 module.exports = {
   addUser,
@@ -330,6 +402,5 @@ module.exports = {
   getTopic,
   getDataForLogin,
   getDataForRegistration,
+  updateUser,
 };
-
-
