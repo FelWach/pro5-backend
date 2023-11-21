@@ -1,9 +1,16 @@
 const { OpenAI } = require("langchain/llms/openai");
+const { HuggingFaceInference } = require("langchain/llms/hf");
 const { config } = require("dotenv");
 const { PromptTemplate } = require("langchain/prompts");
 
 config();
-const model = new OpenAI({ temperature: 0.9 });
+const openaiModel = new OpenAI({ temperature: 0.9 });
+
+const hfModel = new HuggingFaceInference({ model: "mistralai/Mistral-7B-Instruct-v0.1" });
+
+const model = hfModel;
+
+
 
 let lan = "en";
 let lanLevel = "B1";
