@@ -40,10 +40,33 @@ async function generateAnswer(topic, prevQuestion = "") {
   return res;
 }
 
+async function getTopic(input) {
+  let topic = "";
+
+  //split text into a shorter text (just cut the text after 1000 characters)
+
+  let text = input.substring(0, 1000);
+
+  console.log(text);
+
+  prompt = PromptTemplate.fromTemplate(
+    `Please categorize the text in a learning subject context: {text}.`
+  );
+
+  const formattedPrompt = await prompt.format({
+    text: text,
+  });
+
+  const res = await model.call(formattedPrompt);
+  console.log(res);
+  return res;
+}
+
 async function compareLanguages() {}
 
 module.exports = {
   generateAnswer,
   setConfiguration,
   compareLanguages,
+  getTopic,
 };
