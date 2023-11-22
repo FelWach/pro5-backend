@@ -1,8 +1,19 @@
 function extractBeforeA(inputString = "") {
-  var indexOfA = inputString.indexOf("A:");
+  let indexOfA = inputString.indexOf("A:");
   if (indexOfA !== -1) {
-    var substringBeforeA = inputString.substring(0, indexOfA);
+    let substringBeforeA = inputString.substring(0, indexOfA);
     return substringBeforeA.replace("Q:", "");
+  } else {
+    return inputString;
+  }
+}
+
+function removeBeforeAndIncludingTopic(inputString = "") {
+  const indexOfTopic = inputString.toLowerCase().indexOf("topic:");
+
+  if (indexOfTopic !== -1) {
+    const substringAfterTopic = inputString.substring(indexOfTopic + 6); // Adding 6 to exclude "Topic:" or "topic:"
+    return substringAfterTopic;
   } else {
     return inputString;
   }
@@ -29,4 +40,5 @@ module.exports = {
   extractBeforeA,
   splitQuestionAnswer,
   removeNewlines,
+  removeBeforeAndIncludingTopic,
 };

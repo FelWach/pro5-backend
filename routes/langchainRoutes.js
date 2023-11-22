@@ -2,11 +2,14 @@ const {
   generateAnswer,
   setConfiguration,
   getTopic,
+  loadPDF,
+  generateFromDocs,
 } = require("../langchain.js");
 const { addEntry } = require("../db/dbFunctions.js");
 const {
   splitQuestionAnswer,
   removeNewlines,
+  removeBeforeAndIncludingTopic,
 } = require("../helperFunctions.js");
 const pdfParse = require("pdf-parse");
 
@@ -35,7 +38,7 @@ router.post("/generate", async (req, res) => {
     console.log(prevQuestion);
   }
 
-  res.send("Entry generated and stored in database!");
+  res.send("Entries generated and stored in database!");
 });
 
 router.post("/generate/:topic", async (req, res) => {
@@ -60,7 +63,7 @@ router.post("/generate/:topic", async (req, res) => {
     console.log(prevQuestion);
   }
 
-  res.send("Entry generated and stored in database!");
+  res.send("Entries generated and stored in database!");
 });
 
 router.post("/setConfiguration", async (req, res) => {
@@ -81,26 +84,47 @@ router.post("/upload", async (req, res) => {
       return res.status(400).json({ error: "Missing PDF data" });
     }
 
-    const data = await parsePDF(uri);
+    /*const data = await parsePDF(uri);
 
-    const text = removeNewlines(data.text);
+    let text = removeNewlines(data.text);
 
-    //console.log(text);
+    text = text.substring(0, 1000);
 
-    const topic = await getTopic(text);
+    let topic = await getTopic(text);
+
+    topic = removeBeforeTopic(topic);
+
+    console.log(topic);
+    */
 
     //store in topic, name, uri and size in pdf-table
 
-    res.json({ pdfText: text });
+    const docs = await loadPDF(uri);
+
+    nbQuestions = 4;
+
+    for (let i = 0; i < nbQuestions; i++) {
+      let topic = await getTopic(docs[i].pageContent);
+
+      topic = removeBeforeAndIncludingTopic(topic);
+
+      //console.log(topic);
+
+      let generatedAnswer = await generateFromDocs(topic);
+      console.log(generatedAnswer);
+      let { question, answer } = splitQuestionAnswer(generatedAnswer);
+
+      let currentQuestion = question.trim();
+      let currentAnswer = answer.trim();
+
+      addEntry(1, topic, currentQuestion, currentAnswer);
+      //answer += generatedAnswer;
+    }
+    res.json({ message: "stored questions and answers in db" });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-async function parsePDF(uri) {
-  const data = await pdfParse(uri);
-  return data;
-}
 
 module.exports = router;
