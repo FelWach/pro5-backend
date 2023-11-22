@@ -1,4 +1,8 @@
-const { generateAnswer, setConfiguration } = require("../langchain.js");
+const {
+  generateAnswer,
+  setConfiguration,
+  getTopic,
+} = require("../langchain.js");
 const { addEntry } = require("../db/dbFunctions.js");
 const {
   splitQuestionAnswer,
@@ -77,11 +81,15 @@ router.post("/upload", async (req, res) => {
       return res.status(400).json({ error: "Missing PDF data" });
     }
 
-    //store in name, uri and size in pdf-table
-
     const data = await parsePDF(uri);
 
     const text = removeNewlines(data.text);
+
+    //console.log(text);
+
+    const topic = await getTopic(text);
+
+    //store in topic, name, uri and size in pdf-table
 
     res.json({ pdfText: text });
   } catch (error) {
