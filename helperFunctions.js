@@ -21,7 +21,12 @@ function splitQuestionAnswer(generatedAnswer) {
   return { question, answer };
 }
 
+function removeNewlines(text) {
+  return text.replace(/\n/g, "");
+}
+
 module.exports = {
   extractBeforeA,
   splitQuestionAnswer,
+  removeNewlines,
 };

@@ -26,3 +26,13 @@ Content-Type: application/json
     "difficulty": "hard",
     "temperature": 0.9
 }
+
+###
+
+POST http://localhost:3000/upload HTTP/1.1
+Content-Type: application/json
+
+{
+    "uri": "https://www.africau.edu/images/default/sample.pdf",
+    "name": "sample.pdf"
+}
