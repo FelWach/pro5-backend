@@ -11,10 +11,11 @@ const {
   removeNewlines,
   removeBeforeAndIncludingTopic,
 } = require("../helperFunctions.js");
-const pdfParse = require("pdf-parse");
 
 const express = require("express");
 const router = express.Router();
+
+let pdfUri = "";
 
 router.post("/generate", async (req, res) => {
   const { topic, nbQuestions } = req.body;
@@ -84,42 +85,120 @@ router.post("/upload", async (req, res) => {
       return res.status(400).json({ error: "Missing PDF data" });
     }
 
-    /*const data = await parsePDF(uri);
-
-    let text = removeNewlines(data.text);
-
-    text = text.substring(0, 1000);
-
-    let topic = await getTopic(text);
-
-    topic = removeBeforeTopic(topic);
-
-    console.log(topic);
-    */
-
-    //store in topic, name, uri and size in pdf-table
+    //store name, uri and size in pdf-table
 
     const docs = await loadPDF(uri);
+    pdfUri = uri;
 
-    nbQuestions = 4;
+    const totalNbPages = docs.length;
 
-    for (let i = 0; i < nbQuestions; i++) {
-      let topic = await getTopic(docs[i].pageContent);
+    res.send({
+      message: "Possible pages to generate from: " + totalNbPages,
+      pages: totalNbPages,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
-      topic = removeBeforeAndIncludingTopic(topic);
+router.post("/generateFromDocs", async (req, res) => {
+  const { name, nbQuestions, pageStart, pageEnd } = req.body;
 
-      //console.log(topic);
+  const docs = await loadPDF(pdfUri);
 
-      let generatedAnswer = await generateFromDocs(topic);
-      console.log(generatedAnswer);
-      let { question, answer } = splitQuestionAnswer(generatedAnswer);
+  if (docs === -1) {
+    return res.status(400).json({ error: "No PDF uploaded" });
+  }
 
-      let currentQuestion = question.trim();
-      let currentAnswer = answer.trim();
+  try {
+    if (!pageStart && !pageEnd) {
+      //if no pageStart and pageEnd is given, generate random from all pages
+      for (let i = docs.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [docs[i], docs[j]] = [docs[j], docs[i]];
+      }
 
-      addEntry(1, topic, currentQuestion, currentAnswer);
-      //answer += generatedAnswer;
+      for (let i = 0; i < nbQuestions; i++) {
+        let topic = await getTopic(docs[i].pageContent);
+
+        topic = removeBeforeAndIncludingTopic(topic);
+
+        console.log(topic);
+
+        let generatedAnswer = await generateFromDocs(
+          topic,
+          pageStart,
+          pageEnd,
+          docs
+        );
+
+        console.log(generatedAnswer);
+
+        let { question, answer } = splitQuestionAnswer(generatedAnswer);
+
+        let currentQuestion = question.trim();
+        let currentAnswer = answer.trim();
+
+        addEntry(1, name, currentQuestion, currentAnswer);
+        //answer += generatedAnswer;
+      }
+    } else if (!pageEnd) {
+      //if only pageStart is given, generate only for the given page and nbQuestions
+      for (let i = 0; i < nbQuestions; i++) {
+        let topic = await getTopic(docs[pageStart].pageContent);
+
+        topic = removeBeforeAndIncludingTopic(topic);
+
+        console.log(topic);
+
+        let generatedAnswer = await generateFromDocs(
+          topic,
+          pageStart,
+          pageEnd,
+          docs
+        );
+
+        console.log(generatedAnswer);
+
+        let { question, answer } = splitQuestionAnswer(generatedAnswer);
+
+        let currentQuestion = question.trim();
+        let currentAnswer = answer.trim();
+
+        addEntry(1, name, currentQuestion, currentAnswer);
+        //answer += generatedAnswer;
+      }
+    } else if (pageStart && pageEnd) {
+      //if pageStart and pageEnd is given, generate for each page nbQuestions in between
+      for (let i = pageStart; i < pageEnd; i++) {
+        for (let j = 0; j < nbQuestions; j++) {
+          let topic = await getTopic(docs[i].pageContent);
+
+          topic = removeBeforeAndIncludingTopic(topic);
+
+          console.log(topic);
+
+          let generatedAnswer = await generateFromDocs(
+            topic,
+            pageStart,
+            pageEnd,
+            docs
+          );
+
+          console.log(generatedAnswer);
+
+          let { question, answer } = splitQuestionAnswer(generatedAnswer);
+
+          let currentQuestion = question.trim();
+          let currentAnswer = answer.trim();
+
+          addEntry(1, name, currentQuestion, currentAnswer);
+          //answer += generatedAnswer;
+        }
+      }
     }
+
     res.json({ message: "stored questions and answers in db" });
   } catch (error) {
     console.error("Error:", error);

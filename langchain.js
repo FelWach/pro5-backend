@@ -2,7 +2,6 @@ const { OpenAI } = require("langchain/llms/openai");
 const { config } = require("dotenv");
 const { PromptTemplate } = require("langchain/prompts");
 const { PDFLoader } = require("langchain/document_loaders/fs/pdf");
-const { RecursiveCharacterTextSplitter } = require("langchain/text_splitter");
 
 config();
 
@@ -11,20 +10,17 @@ const model = new OpenAI({ temperature: 0.9 });
 let lan = "en";
 let lanLevel = "B1";
 let diff = "medium";
-
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
+let docs = [];
 
 async function loadPDF(uri) {
+  if (!uri) {
+    return -1;
+  }
   const loader = new PDFLoader(uri);
 
-  const docs = await loader.load();
+  docs = await loader.load();
 
-  shuffleArray(docs);
+  //shuffleArray(docs);
 
   return docs;
 }
@@ -89,11 +85,12 @@ async function getTopic(input) {
   let text = input;
 
   prompt = PromptTemplate.fromTemplate(
-    `Categorize the following text! The Output must start with "Topic:" and must not be longer than 4 words! Do not generate any text before or after the "Topic" output! This is the text: {text}.`
+    `Categorize the following text in the following language {language}! The Output must start with "Topic:" and must not be longer than 4 words! Do not generate any text before or after the "Topic" output! This is the text: {text}.`
   );
 
   const formattedPrompt = await prompt.format({
     text: text,
+    language: lan,
   });
 
   const res = await model.call(formattedPrompt);
