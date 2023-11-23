@@ -21,9 +21,9 @@ POST http://localhost:3000/setConfiguration HTTP/1.1
 Content-Type: application/json
 
 {
-    "language": "en",
-    "languageLevel": "C2",
-    "difficulty": "hard",
+    "language": "de",
+    "languageLevel": "normal",
+    "difficulty": "easy",
     "temperature": 0.9
 }
 
@@ -35,4 +35,14 @@ Content-Type: application/json
 {
     "uri": "Foliensatz.pdf",
     "name": "sample.pdf"
+}
+
+###
+
+POST http://localhost:3000/generateFromDocs HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "sample2.pdf",
+    "nbQuestions": "1"
 }

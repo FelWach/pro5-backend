@@ -1,13 +1,29 @@
 const { OpenAI } = require("langchain/llms/openai");
 const { config } = require("dotenv");
 const { PromptTemplate } = require("langchain/prompts");
+const { PDFLoader } = require("langchain/document_loaders/fs/pdf");
 
 config();
+
 const model = new OpenAI({ temperature: 0.9 });
 
 let lan = "en";
 let lanLevel = "B1";
 let diff = "medium";
+let docs = [];
+
+async function loadPDF(uri) {
+  if (!uri) {
+    return -1;
+  }
+  const loader = new PDFLoader(uri);
+
+  docs = await loader.load();
+
+  //shuffleArray(docs);
+
+  return docs;
+}
 
 function setConfiguration(language, languageLevel, difficulty, temperature) {
   if (temperature < 0 || temperature > 1) {
@@ -40,33 +56,51 @@ async function generateAnswer(topic, prevQuestion = "") {
   return res;
 }
 
-async function getTopic(input) {
-  let topic = "";
+async function generateFromDocs(topic) {
+  let output = "";
 
-  //split text into a shorter text (just cut the text after 1000 characters)
-
-  let text = input.substring(0, 1000);
-
-  console.log(text);
+  let prompt = "";
 
   prompt = PromptTemplate.fromTemplate(
-    `Please categorize the text in a learning subject context: {text}.`
+    `Please generate a learning question and answer it. 
+    The question should be about: {topic}. 
+    Please start each Question with "Q:" and each Answer with "A:". 
+    Please write these and answers in the following language: {language} and keep a {languageLevel} language level. 
+    The questions should be of difficulty {difficulty}. `
+  );
+
+  const formattedPrompt = await prompt.format({
+    topic: topic,
+    language: lan,
+    languageLevel: lanLevel,
+    difficulty: diff,
+  });
+
+  output = await model.call(formattedPrompt);
+
+  return output;
+}
+
+async function getTopic(input) {
+  let text = input;
+
+  prompt = PromptTemplate.fromTemplate(
+    `Categorize the following text in the following language {language}! The Output must start with "Topic:" and must not be longer than 4 words! Do not generate any text before or after the "Topic" output! This is the text: {text}.`
   );
 
   const formattedPrompt = await prompt.format({
     text: text,
+    language: lan,
   });
 
   const res = await model.call(formattedPrompt);
-  console.log(res);
   return res;
 }
-
-async function compareLanguages() {}
 
 module.exports = {
   generateAnswer,
   setConfiguration,
-  compareLanguages,
   getTopic,
+  loadPDF,
+  generateFromDocs,
 };
