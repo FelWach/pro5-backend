@@ -12,8 +12,8 @@ Content-Type: application/json
 ### Zeigt alle User an
 GET http://localhost:3000/users HTTP/1.1
 
-###
 
+### Update eines Users
 PUT http://localhost:3000/updateUser/15 HTTP/1.1
 Content-Type: application/json
 
@@ -48,5 +48,8 @@ Content-Type: application/json
     "email": "user@example.com",
     "password": "DieAppistToll"
 }
+
+### Löscht alle Einträge eines Users aus der history table
+DELETE http://localhost:3000/deleteUserEntry/16 HTTP/1.1
 
 
