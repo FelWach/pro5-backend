@@ -5,6 +5,7 @@ const {
   getDataForLogin,
   getDataForRegistration,
   updateUser,
+  deleteUserEntry
 } = require("../db/dbFunctions");
 
 const express = require("express");
@@ -151,6 +152,28 @@ router.post("/register", async (req, res) => {
       .json({ message: "User registered successfully!", userId });
   } catch (error) {
     return res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Route zum Löschen aller Einträge eines Benutzers außer dem Benutzer selbst
+router.delete("/deleteUserEntry/:userID", async (req, res) => {
+  const userId = req.params.userID;
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID missing!" });
+  }
+
+  try {
+    const result = await deleteUserEntry(userId);
+    res.json({
+      message: "All user entries deleted except the user.",
+      deletedEntriesCount: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error while deleting user entries",
+      error: error.message,
+    });
   }
 });
 
