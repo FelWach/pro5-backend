@@ -388,6 +388,29 @@ async function getDataForRegistration(name, email) {
   });
 }
 
+async function deleteUserEntry(userId) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const db = new sqlite3.Database(dbPath);
+
+      db.run(
+        "DELETE FROM history WHERE userId = ? AND id != ?",
+        [userId, userId],
+        function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(this.changes);
+          }
+          db.close();
+        }
+      );
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
 // Export der Funktionen
 module.exports = {
   addUser,
@@ -403,4 +426,5 @@ module.exports = {
   getDataForLogin,
   getDataForRegistration,
   updateUser,
+  deleteUserEntry,
 };
