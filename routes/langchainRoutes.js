@@ -16,6 +16,7 @@ const express = require("express");
 const router = express.Router();
 
 let pdfUri = "";
+let pdfName = "";
 
 router.post("/generate", async (req, res) => {
   const { topic, nbQuestions } = req.body;
@@ -81,6 +82,8 @@ router.post("/upload", async (req, res) => {
   try {
     const { uri, name, size } = req.body;
 
+    pdfName = name;
+
     if (!uri) {
       return res.status(400).json({ error: "Missing PDF data" });
     }
@@ -103,7 +106,7 @@ router.post("/upload", async (req, res) => {
 });
 
 router.post("/generateFromDocs", async (req, res) => {
-  const { name, nbQuestions, pageStart, pageEnd } = req.body;
+  const { nbQuestions, pageStart, pageEnd } = req.body;
 
   const docs = await loadPDF(pdfUri);
 
@@ -140,7 +143,7 @@ router.post("/generateFromDocs", async (req, res) => {
         let currentQuestion = question.trim();
         let currentAnswer = answer.trim();
 
-        addEntry(1, name, currentQuestion, currentAnswer);
+        addEntry(1, pdfName, currentQuestion, currentAnswer);
         //answer += generatedAnswer;
       }
     } else if (!pageEnd) {

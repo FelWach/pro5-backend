@@ -43,6 +43,5 @@ POST http://localhost:3000/generateFromDocs HTTP/1.1
 Content-Type: application/json
 
 {
-    "name": "sample2.pdf",
     "nbQuestions": "1"
 }
