@@ -10,6 +10,8 @@ const {
   splitQuestionAnswer,
   removeNewlines,
   removeBeforeAndIncludingTopic,
+  setCurrentUserId,
+  getCurrentUserId,
 } = require("../helperFunctions.js");
 
 const express = require("express");
@@ -34,7 +36,7 @@ router.post("/generate", async (req, res) => {
     let currentQuestion = question.trim();
     let currentAnswer = answer.trim();
 
-    addEntry(1, topic, currentQuestion, currentAnswer);
+    addEntry(getCurrentUserId(), topic, currentQuestion, currentAnswer);
     answer += generatedAnswer;
     prevQuestion = currentQuestion;
     console.log(prevQuestion);
@@ -59,7 +61,7 @@ router.post("/generate/:topic", async (req, res) => {
     let currentQuestion = question.trim();
     let currentAnswer = answer.trim();
 
-    addEntry(1, topic, currentQuestion, currentAnswer);
+    addEntry(getCurrentUserId(), topic, currentQuestion, currentAnswer);
     answer += generatedAnswer;
     prevQuestion = currentQuestion;
     console.log(prevQuestion);
@@ -143,7 +145,7 @@ router.post("/generateFromDocs", async (req, res) => {
         let currentQuestion = question.trim();
         let currentAnswer = answer.trim();
 
-        addEntry(1, pdfName, currentQuestion, currentAnswer);
+        addEntry(getCurrentUserId(), pdfName, currentQuestion, currentAnswer);
         //answer += generatedAnswer;
       }
     } else if (!pageEnd) {
@@ -169,7 +171,7 @@ router.post("/generateFromDocs", async (req, res) => {
         let currentQuestion = question.trim();
         let currentAnswer = answer.trim();
 
-        addEntry(1, name, currentQuestion, currentAnswer);
+        addEntry(getCurrentUserId(), topic, currentQuestion, currentAnswer);
         //answer += generatedAnswer;
       }
     } else if (pageStart && pageEnd) {
@@ -196,7 +198,7 @@ router.post("/generateFromDocs", async (req, res) => {
           let currentQuestion = question.trim();
           let currentAnswer = answer.trim();
 
-          addEntry(1, name, currentQuestion, currentAnswer);
+          addEntry(getCurrentUserId(), topic, currentQuestion, currentAnswer);
           //answer += generatedAnswer;
         }
       }

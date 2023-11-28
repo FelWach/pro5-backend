@@ -5,8 +5,10 @@ const {
   getDataForLogin,
   getDataForRegistration,
   updateUser,
-  deleteUserEntry
+  deleteUserEntry,
 } = require("../db/dbFunctions");
+
+const { getCurrentUserId, setCurrentUserId } = require("../helperFunctions");
 
 const express = require("express");
 const router = express.Router();
@@ -108,6 +110,7 @@ router.post("/login", async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
       }
       if (result) {
+        setCurrentUserId(user.id);
         return res.status(200).json({ userId: user.id });
       } else {
         return res.status(401).json({ message: "Wrong Password!" });
@@ -147,6 +150,7 @@ router.post("/register", async (req, res) => {
 
     // Hinzufügen des neuen Benutzers
     const userId = await addUser(name, email, password); // Du musst die addUser-Funktion implementieren
+    setCurrentUserId(user.id);
     return res
       .status(201)
       .json({ message: "User registered successfully!", userId });
@@ -156,7 +160,7 @@ router.post("/register", async (req, res) => {
 });
 
 // Route zum Löschen aller Einträge eines Benutzers außer dem Benutzer selbst
-router.delete("/deleteUserEntry/:userID", async (req, res) => {
+router.delete("/deleteUserEntry/:userId", async (req, res) => {
   const userId = req.params.userID;
 
   if (!userId) {

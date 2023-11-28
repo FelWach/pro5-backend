@@ -36,9 +36,13 @@ function removeNewlines(text) {
   return text.replace(/\n/g, "");
 }
 
+let currentUserId;
+
 module.exports = {
   extractBeforeA,
   splitQuestionAnswer,
   removeNewlines,
   removeBeforeAndIncludingTopic,
+  getCurrentUserId: () => currentUserId,
+  setCurrentUserId: (id) => (currentUserId = id),
 };
