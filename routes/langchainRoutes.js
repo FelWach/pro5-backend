@@ -12,8 +12,14 @@ const {
   removeBeforeAndIncludingTopic,
 } = require("../helperFunctions.js");
 
+const multer = require("multer");
+const path = require("path");
+
 const express = require("express");
 const router = express.Router();
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 let pdfUri = "";
 
@@ -77,18 +83,20 @@ router.post("/setConfiguration", async (req, res) => {
   });
 });
 
-router.post("/upload", async (req, res) => {
+router.post("/upload", upload.single("pdf"), async (req, res) => {
   try {
-    const { uri, name, size } = req.body;
+    //const { uri, name, size } = req.body;
 
-    if (!uri) {
+    const pdfBuffer = req.file.buffer;
+    const pdfUri = req.file.originalname;
+
+    if (!pdfUri) {
       return res.status(400).json({ error: "Missing PDF data" });
     }
 
     //store name, uri and size in pdf-table
 
-    const docs = await loadPDF(uri);
-    pdfUri = uri;
+    const docs = await loadPDF(pdfBuffer);
 
     const totalNbPages = docs.length;
 
