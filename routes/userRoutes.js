@@ -113,7 +113,12 @@ router.post("/login", async (req, res) => {
         setCurrentUserId(user.id);
         return res
           .status(200)
-          .json({ userId: user.id, email: user.email, name: user.name });
+          .json({
+            message: "User logged in successfully!",
+            userId: user.id,
+            email: user.email,
+            name: user.name,
+          });
       } else {
         return res.status(401).json({ message: "Wrong Password!" });
       }
@@ -155,7 +160,7 @@ router.post("/register", async (req, res) => {
     setCurrentUserId(userId);
     return res
       .status(201)
-      .json({ message: "User registered successfully!", userId, email });
+      .json({ message: "User registered successfully!", userId, email, name });
   } catch (error) {
     return res.status(500).json({ message: "Internal Server Error", error });
   }
