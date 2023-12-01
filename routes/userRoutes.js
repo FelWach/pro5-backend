@@ -111,7 +111,9 @@ router.post("/login", async (req, res) => {
       }
       if (result) {
         setCurrentUserId(user.id);
-        return res.status(200).json({ userId: user.id });
+        return res
+          .status(200)
+          .json({ userId: user.id, email: user.email, name: user.name });
       } else {
         return res.status(401).json({ message: "Wrong Password!" });
       }
@@ -149,13 +151,13 @@ router.post("/register", async (req, res) => {
     }
 
     // Hinzufügen des neuen Benutzers
-    const userId = await addUser(name, email, password); // Du musst die addUser-Funktion implementieren
-    setCurrentUserId(user.id);
+    const userId = await addUser(name, email, password);
+    setCurrentUserId(userId);
     return res
       .status(201)
-      .json({ message: "User registered successfully!", userId });
+      .json({ message: "User registered successfully!", userId, email });
   } catch (error) {
-    return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(500).json({ message: "Internal Server Error", error });
   }
 });
 
