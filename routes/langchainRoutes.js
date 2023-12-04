@@ -16,6 +16,7 @@ const {
 
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
 
 let pdfUri = "";
 let pdfName = "";
@@ -80,32 +81,53 @@ router.post("/setConfiguration", async (req, res) => {
   });
 });
 
-router.post("/upload", async (req, res) => {
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+router.post("/upload", upload.single("file"), async (req, res) => {
   try {
-    const { uri, name, size } = req.body;
+    console.log("Full Request Body:", req.body);
+    console.log("Full Request File:", req.file);
 
-    pdfName = name;
+    const { buffer, originalname } = req.file;
+    console.log("Buffer:", buffer);
+    console.log("Original Name:", originalname);
 
-    if (!uri) {
-      return res.status(400).json({ error: "Missing PDF data" });
-    }
+    // Führe hier die gewünschten Operationen durch (speichern, verarbeiten, etc.).
 
-    //store name, uri and size in pdf-table
-
-    const docs = await loadPDF(uri);
-    pdfUri = uri;
-
-    const totalNbPages = docs.length;
-
-    res.send({
-      message: "Possible pages to generate from: " + totalNbPages,
-      pages: totalNbPages,
-    });
+    res.send({ message: "File uploaded successfully" });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+// router.post("/upload", async (req, res) => {
+//   try {
+//     const { uri, name, size } = req.body;
+
+//     pdfName = name;
+
+//     if (!uri) {
+//       return res.status(400).json({ error: "Missing PDF data" });
+//     }
+
+//     //store name, uri and size in pdf-table
+
+//     const docs = await loadPDF(uri);
+//     pdfUri = uri;
+
+//     const totalNbPages = docs.length;
+
+//     res.send({
+//       message: "Possible pages to generate from: " + totalNbPages,
+//       pages: totalNbPages,
+//     });
+//   } catch (error) {
+//     console.error("Error:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
 
 router.post("/generateFromDocs", async (req, res) => {
   const { nbQuestions, pageStart, pageEnd } = req.body;
