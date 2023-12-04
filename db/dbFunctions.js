@@ -306,7 +306,7 @@ async function getEntriesWithTopic(userId, topic) {
     const db = new sqlite3.Database(dbPath);
 
     db.all(
-      "SELECT id, topic, frage as Q, antwort as A FROM history WHERE userId = ? AND topic = ?",
+      "SELECT id, frage as Q, antwort as A FROM history WHERE userId = ? AND topic = ?",
       [userId, topic],
       (err, rows) => {
         if (err) {
@@ -326,7 +326,7 @@ async function getTopic(userId) {
     const db = new sqlite3.Database(dbPath);
 
     db.all(
-      "SELECT topic FROM history WHERE userId = ?",
+      "SELECT topic, COUNT(*) as count FROM history WHERE userId = ? GROUP BY topic",
       [userId],
       (err, rows) => {
         if (err) {
