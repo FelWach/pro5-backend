@@ -16,7 +16,10 @@ const {
 
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
+const formidable = require("formidable");
+
+const fs = require("fs");
+const path = require("path");
 
 let pdfUri = "";
 let pdfName = "";
@@ -81,24 +84,39 @@ router.post("/setConfiguration", async (req, res) => {
   });
 });
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+router.post("/upload", async (req, res) => {
+  const form = new formidable.IncomingForm({ multiples: true });
+  const [fields, files] = await form.parse(req);
 
-router.post("/upload", upload.single("file"), async (req, res) => {
-  try {
-    console.log("Full Request Body:", req.body);
-    console.log("Full Request File:", req.file);
+  const pdfFiles = files.pdfFile;
 
-    const { buffer, originalname } = req.file;
-    console.log("Buffer:", buffer);
-    console.log("Original Name:", originalname);
+  if (pdfFiles && pdfFiles.length > 0) {
+    const pdfFile = pdfFiles[0]; // Access the first element of the array
 
-    // Führe hier die gewünschten Operationen durch (speichern, verarbeiten, etc.).
+    const uri = pdfFile.path || pdfFile.filepath; // Try using pdfFile.filepath
 
-    res.send({ message: "File uploaded successfully" });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    if (!uri) {
+      return res.status(400).json({ error: "Missing PDF data" });
+    }
+
+    try {
+      const docs = await loadPDF(uri);
+
+      const totalNbPages = docs.length;
+
+      console.log("totalNbPages:", totalNbPages);
+
+      res.json({
+        message: "Possible pages to generate from: " + totalNbPages,
+        pages: totalNbPages,
+      });
+    } catch (error) {
+      console.error("Error loading PDF:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  } else {
+    console.error("No PDF file uploaded");
+    res.status(400).json({ error: "No PDF file uploaded" });
   }
 });
 
