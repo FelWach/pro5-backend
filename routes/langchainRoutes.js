@@ -102,6 +102,9 @@ router.post("/upload", async (req, res) => {
     try {
       const docs = await loadPDF(uri);
 
+      pdfUri = uri;
+      //pdfName = pdfFile.name;
+
       const totalNbPages = docs.length;
 
       console.log("totalNbPages:", totalNbPages);
