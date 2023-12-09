@@ -85,20 +85,46 @@ router.post("/setConfiguration", async (req, res) => {
 });
 
 router.post("/upload", async (req, res) => {
-  const form = new formidable.IncomingForm({ multiples: true });
-  const [fields, files] = await form.parse(req);
+  const { uri } = req.body;
 
-  const pdfFiles = files.pdfFile;
+  if (!uri) {
+    const form = new formidable.IncomingForm({ multiples: true });
+    const [fields, files] = await form.parse(req);
 
-  if (pdfFiles && pdfFiles.length > 0) {
-    const pdfFile = pdfFiles[0]; // Access the first element of the array
+    const pdfFiles = files.pdfFile;
 
-    const uri = pdfFile.path || pdfFile.filepath; // Try using pdfFile.filepath
+    if (pdfFiles && pdfFiles.length > 0) {
+      const pdfFile = pdfFiles[0]; // Access the first element of the array
 
-    if (!uri) {
-      return res.status(400).json({ error: "Missing PDF data" });
+      const uri = pdfFile.path || pdfFile.filepath; // Try using pdfFile.filepath
+
+      if (!uri) {
+        return res.status(400).json({ error: "Missing PDF data" });
+      }
+
+      try {
+        const docs = await loadPDF(uri);
+
+        pdfUri = uri;
+        //pdfName = pdfFile.name;
+
+        const totalNbPages = docs.length;
+
+        console.log("totalNbPages:", totalNbPages);
+
+        res.json({
+          message: "Possible pages to generate from: " + totalNbPages,
+          pages: totalNbPages,
+        });
+      } catch (error) {
+        console.error("Error loading PDF:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    } else {
+      console.error("No PDF file uploaded");
+      res.status(400).json({ error: "No PDF file uploaded" });
     }
-
+  } else {
     try {
       const docs = await loadPDF(uri);
 
@@ -117,43 +143,15 @@ router.post("/upload", async (req, res) => {
       console.error("Error loading PDF:", error);
       res.status(500).json({ error: "Internal Server Error" });
     }
-  } else {
-    console.error("No PDF file uploaded");
-    res.status(400).json({ error: "No PDF file uploaded" });
   }
 });
-
-// router.post("/upload", async (req, res) => {
-//   try {
-//     const { uri, name, size } = req.body;
-
-//     pdfName = name;
-
-//     if (!uri) {
-//       return res.status(400).json({ error: "Missing PDF data" });
-//     }
-
-//     //store name, uri and size in pdf-table
-
-//     const docs = await loadPDF(uri);
-//     pdfUri = uri;
-
-//     const totalNbPages = docs.length;
-
-//     res.send({
-//       message: "Possible pages to generate from: " + totalNbPages,
-//       pages: totalNbPages,
-//     });
-//   } catch (error) {
-//     console.error("Error:", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
 
 router.post("/generateFromDocs", async (req, res) => {
   const { nbQuestions, pageStart, pageEnd } = req.body;
 
   const docs = await loadPDF(pdfUri);
+
+  let prevQuestion = "";
 
   if (docs === -1) {
     return res.status(400).json({ error: "No PDF uploaded" });
@@ -174,12 +172,7 @@ router.post("/generateFromDocs", async (req, res) => {
 
         console.log(topic);
 
-        let generatedAnswer = await generateFromDocs(
-          topic,
-          pageStart,
-          pageEnd,
-          docs
-        );
+        let generatedAnswer = await generateAnswer(topic, prevQuestion);
 
         console.log(generatedAnswer);
 
@@ -187,6 +180,8 @@ router.post("/generateFromDocs", async (req, res) => {
 
         let currentQuestion = question.trim();
         let currentAnswer = answer.trim();
+
+        prevQuestion = currentQuestion;
 
         addEntry(getCurrentUserId(), pdfName, currentQuestion, currentAnswer);
         //answer += generatedAnswer;
@@ -200,12 +195,7 @@ router.post("/generateFromDocs", async (req, res) => {
 
         console.log(topic);
 
-        let generatedAnswer = await generateFromDocs(
-          topic,
-          pageStart,
-          pageEnd,
-          docs
-        );
+        let generatedAnswer = await generateAnswer(topic, prevQuestion);
 
         console.log(generatedAnswer);
 
@@ -213,6 +203,8 @@ router.post("/generateFromDocs", async (req, res) => {
 
         let currentQuestion = question.trim();
         let currentAnswer = answer.trim();
+
+        prevQuestion = currentQuestion;
 
         addEntry(getCurrentUserId(), topic, currentQuestion, currentAnswer);
         //answer += generatedAnswer;
@@ -227,12 +219,7 @@ router.post("/generateFromDocs", async (req, res) => {
 
           console.log(topic);
 
-          let generatedAnswer = await generateFromDocs(
-            topic,
-            pageStart,
-            pageEnd,
-            docs
-          );
+          let generatedAnswer = await generateAnswer(topic, prevQuestion);
 
           console.log(generatedAnswer);
 
@@ -240,6 +227,8 @@ router.post("/generateFromDocs", async (req, res) => {
 
           let currentQuestion = question.trim();
           let currentAnswer = answer.trim();
+
+          prevQuestion = currentQuestion;
 
           addEntry(getCurrentUserId(), topic, currentQuestion, currentAnswer);
           //answer += generatedAnswer;
