@@ -3,7 +3,7 @@ POST http://localhost:3000/generate HTTP/1.1
 Content-Type: application/json
 
 {
-    "topic": "Languages",
+    "topic": "Sports",
     "nbQuestions": "3"
 }
 
@@ -27,15 +27,16 @@ Content-Type: application/json
     "temperature": 0.9
 }
 
-###
-
+### 
 POST http://localhost:3000/upload HTTP/1.1
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=boundary
 
-{
-    "uri": "Foliensatz.pdf",
-    "name": "sample.pdf"
-}
+--boundary
+Content-Disposition: form-data; name="pdfFile"; filename="Foliensatz.pdf"
+Content-Type: application/pdf
+
+< ./Foliensatz.pdf
+--boundary--
 
 ###
 
@@ -43,6 +44,6 @@ POST http://localhost:3000/generateFromDocs HTTP/1.1
 Content-Type: application/json
 
 {
-    "nbQuestions": "5",
-    "pageStart": "15"
+    "nbQuestions": "3"
+
 }

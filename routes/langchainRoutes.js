@@ -85,51 +85,24 @@ router.post("/setConfiguration", async (req, res) => {
 });
 
 router.post("/upload", async (req, res) => {
-  const { uri } = req.body;
+  const form = new formidable.IncomingForm({ multiples: true });
+  const [fields, files] = await form.parse(req);
 
-  if (!uri) {
-    const form = new formidable.IncomingForm({ multiples: true });
-    const [fields, files] = await form.parse(req);
+  const pdfFiles = files.pdfFile;
 
-    const pdfFiles = files.pdfFile;
+  if (pdfFiles && pdfFiles.length > 0) {
+    const pdfFile = pdfFiles[0];
 
-    if (pdfFiles && pdfFiles.length > 0) {
-      const pdfFile = pdfFiles[0]; // Access the first element of the array
+    const uri = pdfFile.path || pdfFile.filepath;
 
-      const uri = pdfFile.path || pdfFile.filepath; // Try using pdfFile.filepath
-
-      if (!uri) {
-        return res.status(400).json({ error: "Missing PDF data" });
-      }
-
-      try {
-        const docs = await loadPDF(uri);
-
-        pdfUri = uri;
-        //pdfName = pdfFile.name;
-
-        const totalNbPages = docs.length;
-
-        console.log("totalNbPages:", totalNbPages);
-
-        res.json({
-          message: "Possible pages to generate from: " + totalNbPages,
-          pages: totalNbPages,
-        });
-      } catch (error) {
-        console.error("Error loading PDF:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-      }
-    } else {
-      console.error("No PDF file uploaded");
-      res.status(400).json({ error: "No PDF file uploaded" });
+    if (!uri) {
+      return res.status(400).json({ error: "Missing PDF data" });
     }
-  } else {
+
     try {
       const docs = await loadPDF(uri);
 
       pdfUri = uri;
-      //pdfName = pdfFile.name;
 
       const totalNbPages = docs.length;
 
@@ -143,6 +116,9 @@ router.post("/upload", async (req, res) => {
       console.error("Error loading PDF:", error);
       res.status(500).json({ error: "Internal Server Error" });
     }
+  } else {
+    console.error("No PDF file uploaded");
+    res.status(400).json({ error: "No PDF file uploaded" });
   }
 });
 
