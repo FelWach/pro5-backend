@@ -6,6 +6,8 @@ const {
   getDataForRegistration,
   updateUser,
   deleteUserEntry,
+  getEntries,
+  getUserEntries,
 } = require("../db/dbFunctions");
 
 const { getCurrentUserId, setCurrentUserId } = require("../helperFunctions");
@@ -111,14 +113,12 @@ router.post("/login", async (req, res) => {
       }
       if (result) {
         setCurrentUserId(user.id);
-        return res
-          .status(200)
-          .json({
-            message: "User logged in successfully!",
-            userId: user.id,
-            email: user.email,
-            name: user.name,
-          });
+        return res.status(200).json({
+          message: "User logged in successfully!",
+          userId: user.id,
+          email: user.email,
+          name: user.name,
+        });
       } else {
         return res.status(401).json({ message: "Wrong Password!" });
       }
@@ -168,16 +168,23 @@ router.post("/register", async (req, res) => {
 
 // Route zum Löschen aller Einträge eines Benutzers außer dem Benutzer selbst
 router.delete("/deleteUserEntry/:userId", async (req, res) => {
-  const userId = req.params.userID;
+  const userId = req.params.userId;
 
   if (!userId) {
     return res.status(400).json({ message: "User ID missing!" });
   }
 
+  const entries = await getUserEntries(userId);
+  console.log(entries);
+
+  if (entries.length === 0) {
+    return res.status(404).json({ message: "No entries found!" });
+  }
+
   try {
     const result = await deleteUserEntry(userId);
     res.json({
-      message: "All user entries deleted except the user.",
+      message: "All entries deleted from user. " + userId,
       deletedEntriesCount: result,
     });
   } catch (error) {

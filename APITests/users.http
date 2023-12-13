@@ -50,7 +50,7 @@ Content-Type: application/json
 }
 
 ### Löscht alle Einträge eines Users aus der history table
-DELETE http://localhost:3000/deleteUserEntry/16 HTTP/1.1
+DELETE http://localhost:3000/deleteUserEntry/20 HTTP/1.1
 
 ###
 
