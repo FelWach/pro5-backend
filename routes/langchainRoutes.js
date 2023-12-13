@@ -3,14 +3,11 @@ const {
   setConfiguration,
   getTopic,
   loadPDF,
-  generateFromDocs,
 } = require("../langchain.js");
 const { addEntry } = require("../db/dbFunctions.js");
 const {
   splitQuestionAnswer,
-  removeNewlines,
   removeBeforeAndIncludingTopic,
-  setCurrentUserId,
   getCurrentUserId,
 } = require("../helperFunctions.js");
 
@@ -40,10 +37,12 @@ router.post("/generate", async (req, res) => {
     let currentQuestion = question.trim();
     let currentAnswer = answer.trim();
 
+    console.log(currentQuestion);
+
     addEntry(getCurrentUserId(), topic, currentQuestion, currentAnswer);
     answer += generatedAnswer;
-    prevQuestion = currentQuestion;
-    console.log(prevQuestion);
+    prevQuestion += currentQuestion;
+    //console.log(prevQuestion);
   }
 
   res.send("Entries generated and stored in database!");
