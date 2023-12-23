@@ -4,7 +4,7 @@ const {
   getTopic,
   loadPDF,
 } = require("../langchain.js");
-const { addEntry } = require("../db/dbFunctions.js");
+const { addEntry, getEntriesWithTopic } = require("../db/dbFunctions.js");
 const {
   splitQuestionAnswer,
   removeBeforeAndIncludingTopic,
@@ -29,6 +29,44 @@ router.post("/generate", async (req, res) => {
   let answer = "";
 
   let prevQuestion = "";
+
+  for (let i = 0; i < questionAmount; i++) {
+    let generatedAnswer = await generateAnswer(topic, prevQuestion);
+    let { question, answer } = splitQuestionAnswer(generatedAnswer);
+
+    let currentQuestion = question.trim();
+    let currentAnswer = answer.trim();
+
+    console.log(currentQuestion);
+
+    addEntry(getCurrentUserId(), topic, currentQuestion, currentAnswer);
+    answer += generatedAnswer;
+    prevQuestion += currentQuestion;
+    //console.log(prevQuestion);
+  }
+
+  res.send("Entries generated and stored in database!");
+});
+
+router.post("/addToLearnset", async (req, res) => {
+  const { topic, nbQuestions, userId } = req.body;
+
+  questionAmount = nbQuestions;
+
+  let answer = "";
+  prevQuestion = "";
+
+  try {
+    let prevEntries = await getEntriesWithTopic(userId, topic);
+
+    for (let i = 0; i < prevEntries.length; i++) {
+      prevQuestion += prevEntries[i].Q;
+    }
+
+    //res.json(prevQuestion);
+  } catch {
+    console.log("No entries found");
+  }
 
   for (let i = 0; i < questionAmount; i++) {
     let generatedAnswer = await generateAnswer(topic, prevQuestion);
