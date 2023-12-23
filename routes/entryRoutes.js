@@ -8,8 +8,6 @@ const {
   getTopic,
 } = require("../db/dbFunctions.js");
 
-const { compareLanguages } = require("../langchain.js");
-
 const express = require("express");
 const router = express.Router();
 
