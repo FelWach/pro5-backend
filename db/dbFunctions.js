@@ -205,10 +205,12 @@ async function addEntry(userId, topic, frage, antwort) {
       await initializeDatabase();
       const db = new sqlite3.Database(dbPath);
 
+      const timestamp = new Date().toISOString(); // Aktuelles Datum und Uhrzeit im ISO-Format
+
       const stmt = db.prepare(
-        "INSERT INTO history (userId, topic, frage, antwort) VALUES (?, ?, ?, ?)"
+        "INSERT INTO history (userId, topic, frage, antwort, timestamp) VALUES (?, ?, ?, ?, ?)"
       );
-      stmt.run(userId, topic, frage, antwort, function (err) {
+      stmt.run(userId, topic, frage, antwort, timestamp, function (err) {
         if (err) {
           reject(err);
         } else {
@@ -222,6 +224,7 @@ async function addEntry(userId, topic, frage, antwort) {
     }
   });
 }
+
 
 // Funktion zum Abrufen des Fragen/Antworten - Verlaufs eines Benutzers
 async function getUserEntries(userId) {
