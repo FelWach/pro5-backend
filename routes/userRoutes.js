@@ -8,6 +8,8 @@ const {
   deleteUserEntry,
   getEntries,
   getUserEntries,
+  deleteEntriesWithTopic,
+  updateTopicName
 } = require("../db/dbFunctions");
 
 const { getCurrentUserId, setCurrentUserId } = require("../helperFunctions");
@@ -194,5 +196,34 @@ router.delete("/deleteUserEntry/:userId", async (req, res) => {
     });
   }
 });
+
+// Route zum Löschen eines Topics eines Benutzers
+router.delete("/delete/:userId/:topic", async (req, res) => {
+  const { userId, topic } = req.params;
+
+  try {
+    // Funktion aufrufen, um Fragen eines Topics für einen bestimmten Benutzer zu löschen
+    const deletedEntriesCount = await deleteEntriesWithTopic(userId, topic);
+
+    res.json({ message: `${deletedEntriesCount} entries deleted for topic: ${topic} from user: ${userId}` });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete entries", message: error.message });
+  }
+});
+
+// Route zum Umbenennen eines Topics eines Benutzers
+router.put("/update/:userId/:oldTopic/:newTopic", async (req, res) => {
+  const { userId, oldTopic, newTopic } = req.params;
+
+  try {
+    // Funktion aufrufen, um das Topic eines Benutzers zu aktualisieren
+    await updateTopicName(userId, oldTopic, newTopic);
+
+    res.json({ message: `Topic updated from "${oldTopic}" to "${newTopic}" for user: ${userId}` });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update topic name", message: error.message });
+  }
+});
+
 
 module.exports = router;

@@ -414,6 +414,42 @@ async function deleteUserEntry(userId) {
   });
 }
 
+// Route zum Löschen eines Topics eines Benutzers
+async function deleteEntriesWithTopic(userId, topic) {
+  return new Promise((resolve, reject) => {
+    const db = new sqlite3.Database(dbPath);
+
+    db.run("DELETE FROM history WHERE userId = ? AND topic = ?", [userId, topic], function (err) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(this.changes);
+      }
+      db.close();
+    });
+  });
+}
+
+// Route zum Umbenennen eines Topics eines Benutzers
+async function updateTopicName(userId, oldTopic, newTopic) {
+  return new Promise((resolve, reject) => {
+    const db = new sqlite3.Database(dbPath);
+
+    db.run(
+      "UPDATE history SET topic = ? WHERE userId = ? AND topic = ?",
+      [newTopic, userId, oldTopic],
+      function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+        db.close();
+      }
+    );
+  });
+}
+
 // Export der Funktionen
 module.exports = {
   addUser,
@@ -430,4 +466,6 @@ module.exports = {
   getDataForRegistration,
   updateUser,
   deleteUserEntry,
+  deleteEntriesWithTopic,
+  updateTopicName
 };
