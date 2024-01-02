@@ -52,9 +52,13 @@ Content-Type: application/json
 ### Löscht alle Einträge eines Users aus der history table
 DELETE http://localhost:3000/deleteUserEntry/20 HTTP/1.1
 
-###
-
+### Zeigt alle Topics von einem User an
 GET http://localhost:3000/topics/17 HTTP/1.1
 
+### Löscht alle Topics eines Users
+DELETE http://localhost:3000/delete/17/TypeScript HTTP/1.1
+
+### Benennt ein Topic um
+PUT http://localhost:3000/update/8/history/Football HTTP/1.1
 
 
