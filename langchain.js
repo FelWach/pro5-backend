@@ -5,7 +5,16 @@ const { PDFLoader } = require("langchain/document_loaders/fs/pdf");
 
 config();
 
-const model = new OpenAI({ temperature: 0.9 });
+const modelName = "gpt-3.5-turbo-instruct";
+//const modelName = "text-davinci-003";
+
+const model = new OpenAI(
+  { 
+  modelName: modelName,
+  temperature: 0.9 
+  });
+
+//console.log(model);
 
 let lan = "en";
 let lanLevel = "B1";
