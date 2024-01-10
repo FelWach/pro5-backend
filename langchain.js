@@ -51,12 +51,13 @@ async function generateAnswer(topic, prevQuestion = "") {
 
   prompt = PromptTemplate.fromTemplate(
     `Please generate a learning question and answer it. 
-    The topic is {topic}. Please start each Question with "Q:" and each Answer with "A:". 
+    The topic is {topic}. 
+    The following questions have already been asked: ( {prevQuestion} ) Please don't ask the same question more than once.
+    Please start each Question with "Q:" and each Answer with "A:". 
     Please write these and answers in the following language: {language} and keep a {languageLevel} language level. 
-    The questions should be of difficulty {difficulty}. 
-    The following questions have already been asked: {prevQuestion}. 
-    Please generate Questions and Answers that cover a different aspect of {topic}.`
+    The questions should be of difficulty {difficulty}.` 
   );
+
 
   const formattedPrompt = await prompt.format({
     topic: topic,
@@ -65,6 +66,8 @@ async function generateAnswer(topic, prevQuestion = "") {
     languageLevel: lanLevel,
     difficulty: diff,
   });
+
+  console.log(formattedPrompt);
 
   const res = await model.call(formattedPrompt);
   return res;

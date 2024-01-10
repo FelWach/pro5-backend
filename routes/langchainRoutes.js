@@ -54,14 +54,26 @@ router.post("/addToLearnset", async (req, res) => {
   questionAmount = nbQuestions;
 
   let answer = "";
-  prevQuestion = "";
+  let prevQuestion = "";
+  let prevEntriesText = "";
 
   try {
     let prevEntries = await getEntriesWithTopic(userId, topic);
 
-    for (let i = 0; i < prevEntries.length; i++) {
-      prevQuestion += prevEntries[i].Q;
-    }
+    prevEntries.forEach((entry) => {
+      prevEntriesText += " " + entry.Q;
+    });
+
+    prevQuestion = prevEntriesText;
+
+    // console.log(prevQuestion);
+
+    // for (let i = 0; i < prevEntries.length; i++) {
+    //   prevQuestion += prevEntries[i].Q;
+    //   // console.log(prevQuestion);
+    // }
+
+    
 
     //res.json(prevQuestion);
   } catch {
@@ -75,14 +87,15 @@ router.post("/addToLearnset", async (req, res) => {
     let currentQuestion = question.trim();
     let currentAnswer = answer.trim();
 
-    console.log(currentQuestion);
+    // console.log(currentQuestion);
 
     addEntry(getCurrentUserId(), topic, currentQuestion, currentAnswer);
     answer += generatedAnswer;
-    prevQuestion += currentQuestion;
+    prevQuestion += " " + currentQuestion;
     //console.log(prevQuestion);
   }
 
+  // console.log(prevQuestion)
   res.send("Entries generated and stored in database!");
 });
 
