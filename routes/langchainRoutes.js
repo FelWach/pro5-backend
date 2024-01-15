@@ -270,7 +270,7 @@ router.post("/generateFromDocs", async (req, res) => {
 });
 
 router.post("/addToLearnsetFromDocs", async (req, res) => {
-  const { nbQuestions, pageStart, pageEnd, learnsetName } = req.body;
+  const { nbQuestions, pageStart, pageEnd, learnsetName, userId } = req.body;
 
   const docs = await loadPDF(pdfUri);
 
@@ -304,7 +304,7 @@ router.post("/addToLearnsetFromDocs", async (req, res) => {
 
         prevQuestion = currentQuestion;
 
-        addEntry(getCurrentUserId(), learnsetName, currentQuestion, currentAnswer);
+        addEntry(userId, learnsetName, currentQuestion, currentAnswer);
         //answer += generatedAnswer;
       }
     } else if (!pageEnd) {
@@ -327,7 +327,7 @@ router.post("/addToLearnsetFromDocs", async (req, res) => {
 
         prevQuestion = currentQuestion;
 
-        addEntry(getCurrentUserId(), learnsetName, currentQuestion, currentAnswer);
+        addEntry(userId, learnsetName, currentQuestion, currentAnswer);
         //answer += generatedAnswer;
       }
     } else if (pageStart && pageEnd) {
@@ -351,7 +351,7 @@ router.post("/addToLearnsetFromDocs", async (req, res) => {
 
           prevQuestion = currentQuestion;
 
-          addEntry(getCurrentUserId(), learnsetName, currentQuestion, currentAnswer);
+          addEntry(userId, learnsetName, currentQuestion, currentAnswer);
           //answer += generatedAnswer;
         }
       }

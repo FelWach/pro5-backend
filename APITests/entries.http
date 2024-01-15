@@ -24,7 +24,7 @@ GET http://localhost:3000/entries HTTP/1.1
 
 
 ### Gibt alle Einträge eines Users mit ID und dem Topic zurück
-GET http://localhost:3000/entries/1/Hockey HTTP/1.1
+GET http://localhost:3000/entries/17/JavaScript HTTP/1.1
 
 
 ### Löscht den Eintrag mit ID aus dem history table

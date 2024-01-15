@@ -3,8 +3,8 @@ POST http://localhost:3000/generate HTTP/1.1
 Content-Type: application/json
 
 {
-    "topic": "JavaScript",
-    "nbQuestions": "10"
+    "topic": "NodeJS",
+    "nbQuestions": "1"
 }
 
 ### Generiert Frage und Antwort mit topic als param
@@ -32,20 +32,11 @@ POST http://localhost:3000/upload HTTP/1.1
 Content-Type: multipart/form-data; boundary=boundary
 
 --boundary
-Content-Disposition: form-data; name="pdfFile"; filename="Test.pdf"
+Content-Disposition: form-data; name="pdfFile"; filename="inter.pdf"
 Content-Type: application/pdf
 
-< ./Test.pdf
+< ./inter.pdf
 --boundary--
-
-###
-
-POST http://localhost:3000/generateFromDocs HTTP/1.1
-Content-Type: application/json
-
-{
-    "nbQuestions": "3"
-}
 
 ###
 
@@ -53,8 +44,18 @@ POST http://localhost:3000/addToLearnsetFromDocs HTTP/1.1
 Content-Type: application/json
 
 {
-    "nbQuestions": "3",
-    "learnsetName": "LOLOLO.pdf"
+    "nbQuestions": "5",
+    "learnsetName": "auth.pdf",
+    "userId": "17"
+}
+
+###
+
+POST http://localhost:3000/generateFromDocs HTTP/1.1
+Content-Type: application/json
+
+{
+    "nbQuestions": "5"
 }
 
 ###
