@@ -2,11 +2,13 @@ const { OpenAI } = require("langchain/llms/openai");
 const { config } = require("dotenv");
 const { PromptTemplate } = require("langchain/prompts");
 const { PDFLoader } = require("langchain/document_loaders/fs/pdf");
+const { HuggingFaceInference } = require("langchain/llms/hf");
 
 config();
 
 const modelName = "gpt-3.5-turbo-instruct";
 //const modelName = "text-davinci-003";
+//const modelName = "mistralai/Mistral-7B-v0.1";
 
 const model = new OpenAI(
   { 
@@ -14,7 +16,12 @@ const model = new OpenAI(
   temperature: 0.9 
   });
 
-//console.log(model);
+  // const model = new HuggingFaceInference({
+  //   model: modelName,
+  //   temperature: 0.9 
+  // });  
+
+console.log(model);
 
 let lan = "en";
 let lanLevel = "B1";
