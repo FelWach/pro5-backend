@@ -21,7 +21,7 @@ const model = new OpenAI(
   //   temperature: 0.9 
   // });  
 
-console.log(model);
+//console.log(model);
 
 let lan = "en";
 let lanLevel = "B1";
