@@ -54,14 +54,26 @@ router.post("/addToLearnset", async (req, res) => {
   questionAmount = nbQuestions;
 
   let answer = "";
-  prevQuestion = "";
+  let prevQuestion = "";
+  let prevEntriesText = "";
 
   try {
     let prevEntries = await getEntriesWithTopic(userId, topic);
 
-    for (let i = 0; i < prevEntries.length; i++) {
-      prevQuestion += prevEntries[i].Q;
-    }
+    prevEntries.forEach((entry) => {
+      prevEntriesText += " " + entry.Q;
+    });
+
+    prevQuestion = prevEntriesText;
+
+    // console.log(prevQuestion);
+
+    // for (let i = 0; i < prevEntries.length; i++) {
+    //   prevQuestion += prevEntries[i].Q;
+    //   // console.log(prevQuestion);
+    // }
+
+    
 
     //res.json(prevQuestion);
   } catch {
@@ -75,14 +87,15 @@ router.post("/addToLearnset", async (req, res) => {
     let currentQuestion = question.trim();
     let currentAnswer = answer.trim();
 
-    console.log(currentQuestion);
+    // console.log(currentQuestion);
 
     addEntry(getCurrentUserId(), topic, currentQuestion, currentAnswer);
     answer += generatedAnswer;
-    prevQuestion += currentQuestion;
+    prevQuestion += " " + currentQuestion;
     //console.log(prevQuestion);
   }
 
+  // console.log(prevQuestion)
   res.send("Entries generated and stored in database!");
 });
 
@@ -140,6 +153,8 @@ router.post("/upload", async (req, res) => {
       const docs = await loadPDF(uri);
 
       pdfUri = uri;
+      pdfName = pdfFile.originalFilename;
+      console.log("pdfName:", pdfName);
 
       const totalNbPages = docs.length;
 
@@ -172,7 +187,7 @@ router.post("/generateFromDocs", async (req, res) => {
 
   try {
     if (!pageStart && !pageEnd) {
-      //if no pageStart and pageEnd is given, generate random from all pages
+      //if no pageStart and no pageEnd is given, generate random from all pages
       for (let i = docs.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [docs[i], docs[j]] = [docs[j], docs[i]];
@@ -186,8 +201,6 @@ router.post("/generateFromDocs", async (req, res) => {
         console.log(topic);
 
         let generatedAnswer = await generateAnswer(topic, prevQuestion);
-
-        console.log(generatedAnswer);
 
         let { question, answer } = splitQuestionAnswer(generatedAnswer);
 
@@ -219,7 +232,7 @@ router.post("/generateFromDocs", async (req, res) => {
 
         prevQuestion = currentQuestion;
 
-        addEntry(getCurrentUserId(), topic, currentQuestion, currentAnswer);
+        addEntry(getCurrentUserId(), pdfName, currentQuestion, currentAnswer);
         //answer += generatedAnswer;
       }
     } else if (pageStart && pageEnd) {
@@ -243,7 +256,7 @@ router.post("/generateFromDocs", async (req, res) => {
 
           prevQuestion = currentQuestion;
 
-          addEntry(getCurrentUserId(), topic, currentQuestion, currentAnswer);
+          addEntry(getCurrentUserId(), pdfName, currentQuestion, currentAnswer);
           //answer += generatedAnswer;
         }
       }
@@ -255,5 +268,101 @@ router.post("/generateFromDocs", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+router.post("/addToLearnsetFromDocs", async (req, res) => {
+  const { nbQuestions, pageStart, pageEnd, learnsetName } = req.body;
+
+  const docs = await loadPDF(pdfUri);
+
+  let prevQuestion = "";
+
+  if (docs === -1) {
+    return res.status(400).json({ error: "No PDF uploaded" });
+  }
+
+  try {
+    if (!pageStart && !pageEnd) {
+      //if no pageStart and no pageEnd is given, generate random from all pages
+      for (let i = docs.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [docs[i], docs[j]] = [docs[j], docs[i]];
+      }
+
+      for (let i = 0; i < nbQuestions; i++) {
+        let topic = await getTopic(docs[i].pageContent);
+
+        topic = removeBeforeAndIncludingTopic(topic);
+
+        console.log(topic);
+
+        let generatedAnswer = await generateAnswer(topic, prevQuestion);
+
+        let { question, answer } = splitQuestionAnswer(generatedAnswer);
+
+        let currentQuestion = question.trim();
+        let currentAnswer = answer.trim();
+
+        prevQuestion = currentQuestion;
+
+        addEntry(getCurrentUserId(), learnsetName, currentQuestion, currentAnswer);
+        //answer += generatedAnswer;
+      }
+    } else if (!pageEnd) {
+      //if only pageStart is given, generate only for the given page and nbQuestions
+      for (let i = 0; i < nbQuestions; i++) {
+        let topic = await getTopic(docs[pageStart].pageContent);
+
+        topic = removeBeforeAndIncludingTopic(topic);
+
+        console.log(topic);
+
+        let generatedAnswer = await generateAnswer(topic, prevQuestion);
+
+        console.log(generatedAnswer);
+
+        let { question, answer } = splitQuestionAnswer(generatedAnswer);
+
+        let currentQuestion = question.trim();
+        let currentAnswer = answer.trim();
+
+        prevQuestion = currentQuestion;
+
+        addEntry(getCurrentUserId(), learnsetName, currentQuestion, currentAnswer);
+        //answer += generatedAnswer;
+      }
+    } else if (pageStart && pageEnd) {
+      //if pageStart and pageEnd is given, generate for each page nbQuestions in between
+      for (let i = pageStart; i < pageEnd; i++) {
+        for (let j = 0; j < nbQuestions; j++) {
+          let topic = await getTopic(docs[i].pageContent);
+
+          topic = removeBeforeAndIncludingTopic(topic);
+
+          console.log(topic);
+
+          let generatedAnswer = await generateAnswer(topic, prevQuestion);
+
+          console.log(generatedAnswer);
+
+          let { question, answer } = splitQuestionAnswer(generatedAnswer);
+
+          let currentQuestion = question.trim();
+          let currentAnswer = answer.trim();
+
+          prevQuestion = currentQuestion;
+
+          addEntry(getCurrentUserId(), learnsetName, currentQuestion, currentAnswer);
+          //answer += generatedAnswer;
+        }
+      }
+    }
+
+    res.json({ message: "stored questions and answers in db" });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 
 module.exports = router;
