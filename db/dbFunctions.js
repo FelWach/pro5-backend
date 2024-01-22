@@ -329,7 +329,7 @@ async function getTopic(userId) {
     const db = new sqlite3.Database(dbPath);
 
     db.all(
-      "SELECT topic, COUNT(*) as count FROM history WHERE userId = ? GROUP BY topic",
+      "SELECT topic, COUNT(*) as count, MAX(timestamp) as maxTimestamp FROM history WHERE userId = ? GROUP BY topic ORDER BY maxTimestamp DESC",
       [userId],
       (err, rows) => {
         if (err) {
@@ -342,6 +342,7 @@ async function getTopic(userId) {
     );
   });
 }
+
 
 // Funktion zum Abrufen der Daten eines Benutzers für den Login
 async function getDataForLogin(nameOrEmail) {
