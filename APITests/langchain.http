@@ -55,7 +55,9 @@ POST http://localhost:3000/generateFromDocs HTTP/1.1
 Content-Type: application/json
 
 {
-    "nbQuestions": "5"
+    "nbQuestions": "5",
+    "pageStart": "1",
+    "pageEnd": "1",
 }
 
 ###

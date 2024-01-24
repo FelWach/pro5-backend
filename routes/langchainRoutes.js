@@ -175,7 +175,9 @@ router.post("/upload", async (req, res) => {
 });
 
 router.post("/generateFromDocs", async (req, res) => {
-  const { nbQuestions, pageStart, pageEnd } = req.body;
+  const { nbQuestions } = req.body;
+  let pageStart = parseInt(req.body.pageStart, 10) -1;
+  let pageEnd = parseInt(req.body.pageEnd, 10) -1;
 
   const docs = await loadPDF(pdfUri);
 
@@ -212,18 +214,13 @@ router.post("/generateFromDocs", async (req, res) => {
         addEntry(getCurrentUserId(), pdfName, currentQuestion, currentAnswer);
         //answer += generatedAnswer;
       }
-    } else if (!pageEnd) {
-      //if only pageStart is given, generate only for the given page and nbQuestions
-      for (let i = 0; i < nbQuestions; i++) {
-        let topic = await getTopic(docs[pageStart].pageContent);
+    } else if (pageEnd === pageStart) {
+      for(let i = 0; i < nbQuestions; i++) {
+        let topic = await getTopic(docs[pageStart-1].pageContent);
 
         topic = removeBeforeAndIncludingTopic(topic);
 
-        console.log(topic);
-
         let generatedAnswer = await generateAnswer(topic, prevQuestion);
-
-        console.log(generatedAnswer);
 
         let { question, answer } = splitQuestionAnswer(generatedAnswer);
 
@@ -233,17 +230,44 @@ router.post("/generateFromDocs", async (req, res) => {
         prevQuestion = currentQuestion;
 
         addEntry(getCurrentUserId(), pdfName, currentQuestion, currentAnswer);
-        //answer += generatedAnswer;
       }
-    } else if (pageStart && pageEnd) {
-      //if pageStart and pageEnd is given, generate for each page nbQuestions in between
-      for (let i = pageStart; i < pageEnd; i++) {
-        for (let j = 0; j < nbQuestions; j++) {
+  
+    } else {
+      if (pageEnd < pageStart) {
+        let temp = pageStart;
+        pageStart = pageEnd;
+        pageEnd = temp;
+      }
+      let questionsPerPage = Math.floor(nbQuestions / (pageEnd - pageStart + 1));
+      console.log("questionsPerPage:", questionsPerPage);
+      let questionsLeftOver = nbQuestions % (pageEnd - pageStart + 1);
+      console.log("questionsLeftOver:", questionsLeftOver);
+      let questionsLeftOverCounter = 0;
+
+      for (let i = pageStart; i <= pageEnd; i++) {
+        for (let j = 0; j < questionsPerPage; j++) {
           let topic = await getTopic(docs[i].pageContent);
 
           topic = removeBeforeAndIncludingTopic(topic);
 
-          console.log(topic);
+          console.log(docs[i].pageContent);
+
+          let generatedAnswer = await generateAnswer(topic, prevQuestion);
+
+          let { question, answer } = splitQuestionAnswer(generatedAnswer);
+
+          let currentQuestion = question.trim();
+          let currentAnswer = answer.trim();
+
+          prevQuestion = currentQuestion;
+
+          addEntry(getCurrentUserId(), pdfName, currentQuestion, currentAnswer);
+        }
+
+        if (questionsLeftOverCounter < questionsLeftOver) {
+          let topic = await getTopic(docs[i].pageContent);
+
+          topic = removeBeforeAndIncludingTopic(topic);
 
           let generatedAnswer = await generateAnswer(topic, prevQuestion);
 
@@ -257,9 +281,10 @@ router.post("/generateFromDocs", async (req, res) => {
           prevQuestion = currentQuestion;
 
           addEntry(getCurrentUserId(), pdfName, currentQuestion, currentAnswer);
-          //answer += generatedAnswer;
+
+          questionsLeftOverCounter++;
         }
-      }
+      }   
     }
 
     res.json({ message: "stored questions and answers in db" });
@@ -270,7 +295,9 @@ router.post("/generateFromDocs", async (req, res) => {
 });
 
 router.post("/addToLearnsetFromDocs", async (req, res) => {
-  const { nbQuestions, pageStart, pageEnd, learnsetName, userId } = req.body;
+  const { nbQuestions, learnsetName, userId } = req.body;
+  let pageStart = parseInt(req.body.pageStart, 10) -1;
+  let pageEnd = parseInt(req.body.pageEnd, 10) -1;
 
   const docs = await loadPDF(pdfUri);
 
@@ -293,8 +320,6 @@ router.post("/addToLearnsetFromDocs", async (req, res) => {
 
         topic = removeBeforeAndIncludingTopic(topic);
 
-        console.log(topic);
-
         let generatedAnswer = await generateAnswer(topic, prevQuestion);
 
         let { question, answer } = splitQuestionAnswer(generatedAnswer);
@@ -305,20 +330,14 @@ router.post("/addToLearnsetFromDocs", async (req, res) => {
         prevQuestion = currentQuestion;
 
         addEntry(userId, learnsetName, currentQuestion, currentAnswer);
-        //answer += generatedAnswer;
       }
-    } else if (!pageEnd) {
-      //if only pageStart is given, generate only for the given page and nbQuestions
-      for (let i = 0; i < nbQuestions; i++) {
-        let topic = await getTopic(docs[pageStart].pageContent);
+    } else if (pageEnd === pageStart) {
+      for(let i = 0; i < nbQuestions; i++) {
+        let topic = await getTopic(docs[pageStart-1].pageContent);
 
         topic = removeBeforeAndIncludingTopic(topic);
 
-        console.log(topic);
-
         let generatedAnswer = await generateAnswer(topic, prevQuestion);
-
-        console.log(generatedAnswer);
 
         let { question, answer } = splitQuestionAnswer(generatedAnswer);
 
@@ -328,21 +347,24 @@ router.post("/addToLearnsetFromDocs", async (req, res) => {
         prevQuestion = currentQuestion;
 
         addEntry(userId, learnsetName, currentQuestion, currentAnswer);
-        //answer += generatedAnswer;
       }
-    } else if (pageStart && pageEnd) {
-      //if pageStart and pageEnd is given, generate for each page nbQuestions in between
-      for (let i = pageStart; i < pageEnd; i++) {
-        for (let j = 0; j < nbQuestions; j++) {
+    } else {
+      if (pageEnd < pageStart) {
+        let temp = pageStart;
+        pageStart = pageEnd;
+        pageEnd = temp;
+      }
+      let questionsPerPage = Math.floor(nbQuestions / (pageEnd - pageStart + 1));
+      let questionsLeftOver = nbQuestions % (pageEnd - pageStart + 1);
+      let questionsLeftOverCounter = 0;
+
+      for (let i = pageStart; i <= pageEnd; i++) {
+        for (let j = 0; j < questionsPerPage; j++) {
           let topic = await getTopic(docs[i].pageContent);
 
           topic = removeBeforeAndIncludingTopic(topic);
 
-          console.log(topic);
-
           let generatedAnswer = await generateAnswer(topic, prevQuestion);
-
-          console.log(generatedAnswer);
 
           let { question, answer } = splitQuestionAnswer(generatedAnswer);
 
@@ -352,9 +374,27 @@ router.post("/addToLearnsetFromDocs", async (req, res) => {
           prevQuestion = currentQuestion;
 
           addEntry(userId, learnsetName, currentQuestion, currentAnswer);
-          //answer += generatedAnswer;
         }
-      }
+
+        if (questionsLeftOverCounter < questionsLeftOver) {
+          let topic = await getTopic(docs[i].pageContent);
+
+          topic = removeBeforeAndIncludingTopic(topic);
+
+          let generatedAnswer = await generateAnswer(topic, prevQuestion);
+
+          let { question, answer } = splitQuestionAnswer(generatedAnswer);
+
+          let currentQuestion = question.trim();
+          let currentAnswer = answer.trim();
+
+          prevQuestion = currentQuestion;
+
+          addEntry(userId, learnsetName, currentQuestion, currentAnswer);
+
+          questionsLeftOverCounter++;
+        }
+      }   
     }
 
     res.json({ message: "stored questions and answers in db" });
