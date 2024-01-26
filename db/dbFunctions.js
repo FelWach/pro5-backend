@@ -491,6 +491,25 @@ async function updateAnswer(id, newAnswer) {
   });
 }
 
+async function deleteLearnset(userId, topic) {
+  return new Promise((resolve, reject) => {
+    const db = new sqlite3.Database(dbPath);
+
+    db.run(
+      "DELETE FROM history WHERE userId = ? AND topic = ?",
+      [userId, topic],
+      function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(this.changes);
+        }
+        db.close();
+      }
+    );
+  });
+}
+
 // Export der Funktionen
 module.exports = {
   addUser,
@@ -511,4 +530,5 @@ module.exports = {
   updateTopicName,
   updateQuestion,
   updateAnswer,
+  deleteLearnset,
 };

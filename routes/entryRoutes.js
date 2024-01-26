@@ -8,6 +8,7 @@ const {
   getTopic,
   updateAnswer,
   updateQuestion,
+  deleteLearnset,
 } = require("../db/dbFunctions.js");
 
 const express = require("express");
@@ -122,6 +123,26 @@ router.get("/topics/:userId", async (req, res) => {
     res.json(topics);
   } catch (error) {
     res.status(500).json({ message: "Error while fetching topics!" });
+  }
+});
+
+router.delete("/deleteLearnset/:userId/:topic", async (req, res) => {
+  const userId = req.params.userId;
+  const topic = req.params.topic;
+
+  if (!userId || !topic) {
+    return res.status(400).json({ message: "User ID and topic required!" });
+  }
+
+  try {
+    const deletedCount = await deleteLearnset(userId, topic);
+    if (deletedCount > 0) {
+      res.json({ message: "Learnset deleted successfully!" });
+    } else {
+      res.status(404).json({ message: "Learnset not found!" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error while deleting learnset!" });
   }
 });
 

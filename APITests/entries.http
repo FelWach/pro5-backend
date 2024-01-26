@@ -32,6 +32,10 @@ DELETE http://localhost:3000/deleteEntry/28 HTTP/1.1
 
 ###
 
+DELETE http://localhost:3000/deleteLearnset/17/Foliensatz.pdf HTTP/1.1
+
+###
+
 PUT http://localhost:3000/updateQuestion/53 HTTP/1.1
 Content-Type: application/json
 
