@@ -6,6 +6,8 @@ const {
   getEntries,
   getEntriesWithTopic,
   getTopic,
+  updateAnswer,
+  updateQuestion,
 } = require("../db/dbFunctions.js");
 
 const express = require("express");
@@ -120,6 +122,42 @@ router.get("/topics/:userId", async (req, res) => {
     res.json(topics);
   } catch (error) {
     res.status(500).json({ message: "Error while fetching topics!" });
+  }
+});
+
+router.put("/updateAnswer/:id", async (req, res) => {
+  const questionId = req.params.id;
+  const { answer } = req.body;
+
+  if (!questionId || !answer) {
+    return res
+      .status(400)
+      .json({ message: "Question ID and answer required!" });
+  }
+
+  try {
+    await updateAnswer(questionId, answer);
+    res.json({ message: "Answer updated successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: "Error while updating answer!" });
+  }
+});
+
+router.put("/updateQuestion/:id", async (req, res) => {
+  const questionId = req.params.id;
+  const { question } = req.body;
+
+  if (!questionId || !question) {
+    return res
+      .status(400)
+      .json({ message: "Question ID and question required!" });
+  }
+
+  try {
+    await updateQuestion(questionId, question);
+    res.json({ message: "Question updated successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: "Error while updating question!" });
   }
 });
 

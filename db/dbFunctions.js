@@ -225,7 +225,6 @@ async function addEntry(userId, topic, frage, antwort) {
   });
 }
 
-
 // Funktion zum Abrufen des Fragen/Antworten - Verlaufs eines Benutzers
 async function getUserEntries(userId) {
   return new Promise((resolve, reject) => {
@@ -343,7 +342,6 @@ async function getTopic(userId) {
   });
 }
 
-
 // Funktion zum Abrufen der Daten eines Benutzers für den Login
 async function getDataForLogin(nameOrEmail) {
   return new Promise(async (resolve, reject) => {
@@ -420,14 +418,18 @@ async function deleteEntriesWithTopic(userId, topic) {
   return new Promise((resolve, reject) => {
     const db = new sqlite3.Database(dbPath);
 
-    db.run("DELETE FROM history WHERE userId = ? AND topic = ?", [userId, topic], function (err) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(this.changes);
+    db.run(
+      "DELETE FROM history WHERE userId = ? AND topic = ?",
+      [userId, topic],
+      function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(this.changes);
+        }
+        db.close();
       }
-      db.close();
-    });
+    );
   });
 }
 
@@ -439,6 +441,44 @@ async function updateTopicName(userId, oldTopic, newTopic) {
     db.run(
       "UPDATE history SET topic = ? WHERE userId = ? AND topic = ?",
       [newTopic, userId, oldTopic],
+      function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+        db.close();
+      }
+    );
+  });
+}
+
+async function updateQuestion(id, newQuestion) {
+  return new Promise((resolve, reject) => {
+    const db = new sqlite3.Database(dbPath);
+
+    db.run(
+      "UPDATE history SET frage = ? WHERE id = ?",
+      [newQuestion, id],
+      function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+        db.close();
+      }
+    );
+  });
+}
+
+async function updateAnswer(id, newAnswer) {
+  return new Promise((resolve, reject) => {
+    const db = new sqlite3.Database(dbPath);
+
+    db.run(
+      "UPDATE history SET antwort = ? WHERE id = ?",
+      [newAnswer, id],
       function (err) {
         if (err) {
           reject(err);
@@ -468,5 +508,7 @@ module.exports = {
   updateUser,
   deleteUserEntry,
   deleteEntriesWithTopic,
-  updateTopicName
+  updateTopicName,
+  updateQuestion,
+  updateAnswer,
 };
